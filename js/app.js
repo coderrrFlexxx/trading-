@@ -50,11 +50,10 @@ function renderTrades() {
   cont.innerHTML = renderTable(list, false);
 }
 
-/* ---------- Event delegation for dynamic buttons ---------- */
 function bindGlobalActions() {
   document.addEventListener('click', function (e) {
     var target = e.target;
-    // Handle button with data-action
+
     var btn = target.closest ? target.closest('[data-action]') : null;
     if (btn) {
       var action = btn.dataset.action;
@@ -70,7 +69,6 @@ function bindGlobalActions() {
       return;
     }
 
-    // Handle data-close buttons (modal close)
     var closeBtn = target.closest ? target.closest('[data-close]') : null;
     if (closeBtn) {
       closeModal(closeBtn.dataset.close);
@@ -81,7 +79,6 @@ function bindGlobalActions() {
       return;
     }
 
-    // Handle data-goto buttons
     var gotoBtn = target.closest ? target.closest('[data-goto]') : null;
     if (gotoBtn) {
       go(gotoBtn.dataset.goto);
@@ -90,7 +87,6 @@ function bindGlobalActions() {
   });
 }
 
-/* ---------- Backdrop click + ESC ---------- */
 function bindModalDismiss() {
   $$('.modal-backdrop').forEach(function (backdrop) {
     backdrop.addEventListener('click', function (e) {
@@ -107,7 +103,6 @@ function bindModalDismiss() {
     }
   });
 
-  // Confirm modal OK button
   var okBtn = $('confirmOk');
   if (okBtn) {
     okBtn.addEventListener('click', function () {
@@ -121,40 +116,32 @@ function bindModalDismiss() {
   }
 }
 
-/* ---------- Init ---------- */
 function init() {
-  // Theme: force light off-white default, only honor dark if user chose it
   var savedTheme = null;
   try { savedTheme = localStorage.getItem(KEYS.theme); } catch (e) {}
   applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
 
-  // Load data
   loadTrades();
   loadPlaybook();
   loadReviews();
   loadBacktests();
 
-  // Topbar
   $('themeBtn').addEventListener('click', toggleTheme);
   $('addTradeTop').addEventListener('click', function () { openTradeModal(); });
 
-  // Form submissions
   $('tradeForm').addEventListener('submit', submitTrade);
   $('playbookForm').addEventListener('submit', submitPlaybook);
   $('reviewForm').addEventListener('submit', submitReview);
   $('backtestForm').addEventListener('submit', submitBacktest);
 
-  // Nav
   $$('.nav-item').forEach(function (btn) {
     btn.addEventListener('click', function () { go(btn.dataset.page); });
   });
 
-  // Trades filters
   $('filterSearch').addEventListener('input', renderTrades);
   $('filterSide').addEventListener('change', renderTrades);
   $('filterResult').addEventListener('change', renderTrades);
 
-  // Calendar
   $('calPrev').addEventListener('click', function () {
     calCurrent.setMonth(calCurrent.getMonth() - 1);
     renderCalendar();
@@ -164,14 +151,16 @@ function init() {
     renderCalendar();
   });
 
-  // Playbook
   $('addPlaybookBtn').addEventListener('click', function () { openPlaybookModal(); });
-
-  // Reviews
   $('addReviewBtn').addEventListener('click', function () { openReviewModal(); });
-
-  // Backtesting
   $('addBacktestBtn').addEventListener('click', function () { openBacktestModal(); });
+
+  // Analytics filters
+  if ($('anPeriod')) $('anPeriod').addEventListener('change', renderAnalytics);
+  if ($('anSymbol')) $('anSymbol').addEventListener('input', renderAnalytics);
+
+  // Review period tabs
+  initReviewTabs();
 
   // Risk calculator
   initRisk();
@@ -183,12 +172,11 @@ function init() {
   bindGlobalActions();
   bindModalDismiss();
 
-  // Register service worker (optional)
+  // Service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js').catch(function () {});
   }
 
-  // First render
   go('dashboard');
 }
 
