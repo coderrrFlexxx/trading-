@@ -79,7 +79,7 @@ header.topbar { display: flex; align-items: center; justify-content: space-betwe
 .page-head h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
 .page-head p { color: var(--text-dim); margin-top: 4px; font-size: 14px; }
 
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
 .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); transition: all .2s ease; }
 .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
 .stat-label { font-size: 12px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
@@ -91,6 +91,7 @@ header.topbar { display: flex; align-items: center; justify-content: space-betwe
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px; }
 .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 10px; flex-wrap: wrap; }
 .card-head h2 { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+.card-sub { font-size: 12.5px; color: var(--text-dim); margin-top: 2px; }
 
 .btn {
   display: inline-flex; align-items: center; gap: 6px;
@@ -131,6 +132,7 @@ tbody tr:last-child td { border-bottom: none; }
 .pill-buy { background: var(--green-soft); color: var(--green); }
 .pill-sell { background: var(--red-soft); color: var(--red); }
 .empty { text-align: center; padding: 40px 20px; color: var(--text-dim); font-size: 14px; }
+.empty strong { display: block; color: var(--text); margin-bottom: 4px; }
 
 nav.bottom {
   position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
@@ -210,6 +212,7 @@ nav.bottom::-webkit-scrollbar { display: none; }
 .filters input, .filters select { padding: 8px 11px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface-2); outline: none; font-size: 13px; }
 .filters input:focus, .filters select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 
+/* Calendar */
 .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
 .cal-head h2 { font-size: 17px; font-weight: 700; }
 .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 6px; }
@@ -232,9 +235,30 @@ nav.bottom::-webkit-scrollbar { display: none; }
 .cal-day.today { outline: 2px solid var(--accent); outline-offset: -2px; }
 .cal-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr)); gap: 12px; margin-top: 16px; }
 
-.risk-result { margin-top: 20px; }
-.risk-result .mini-stats { margin-top: 12px; }
+/* Risk result */
+.risk-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+@media (max-width: 600px) { .risk-grid { grid-template-columns: repeat(2, 1fr); } }
+.risk-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 12px;
+}
+.risk-box .k {
+  font-size: 11px; color: var(--text-dim); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.risk-box .v {
+  font-size: 16px; font-weight: 800; letter-spacing: -0.02em;
+  margin-top: 6px;
+}
 
+/* Item cards */
 .item-card {
   border: 1px solid var(--border); border-radius: 12px;
   padding: 16px; margin-bottom: 10px; background: var(--surface-2);
@@ -245,18 +269,55 @@ nav.bottom::-webkit-scrollbar { display: none; }
 .item-title { font-weight: 700; font-size: 15px; }
 .item-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
 .item-body { font-size: 13.5px; color: var(--text-dim); margin-top: 8px; white-space: pre-wrap; }
-.item-actions { display: flex; gap: 6px; }
-
+.item-actions { display: flex; gap: 6px; flex-shrink: 0; }
 .stars { color: var(--amber); font-size: 14px; letter-spacing: 2px; }
 
-@media (max-width: 480px) {
-  .page-head h1 { font-size: 22px; }
-  .stat-value { font-size: 20px; }
-  .modal { padding: 18px; }
-  .cal-day { min-height: 48px; padding: 4px; }
-  .cal-day .d-pnl { font-size: 10px; }
+/* Two-column layout */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+/* Curve chart */
+.curve-wrap { height: 200px; width: 100%; position: relative; padding: 10px 0; }
+.curve-svg { width: 100%; height: 100%; display: block; }
+.curve-line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.curve-area { opacity: .35; }
+.curve-empty {
+  height: 200px; display: grid; place-items: center;
+  color: var(--text-dim); font-size: 13.5px; text-align: center;
 }
-/* ===== Custom styled select ===== */
+.curve-empty strong { display: block; color: var(--text); font-size: 15px; margin-bottom: 4px; }
+
+/* Streak */
+.streak-big { font-size: 32px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px; }
+.streak-big.pos { color: var(--green); }
+.streak-big.neg { color: var(--red); }
+.streak-label { font-size: 13.5px; color: var(--text-dim); line-height: 1.5; }
+
+/* Direction stats */
+.dir-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.dir-row:last-child { border-bottom: none; }
+.dir-name { font-weight: 700; font-size: 14.5px; }
+.dir-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.dir-val { font-weight: 800; font-size: 16px; letter-spacing: -0.02em; }
+
+/* Setup / Psychology */
+.setup-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.setup-row:last-child { border-bottom: none; }
+.setup-name { font-weight: 600; font-size: 13.5px; }
+.setup-meta { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
+.setup-val { font-weight: 800; font-size: 14px; letter-spacing: -0.02em; }
+
+/* Tabs */
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.tab {
+  padding: 7px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-dim); transition: all .15s ease;
+}
+.tab:hover { color: var(--text); background: var(--surface-2); }
+.tab.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+
+/* Custom styled select */
 .field select,
 .filters select,
 .select-styled {
@@ -276,11 +337,6 @@ nav.bottom::-webkit-scrollbar { display: none; }
 [data-theme="dark"] .select-styled {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a89e85' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
 }
-.field select:focus,
-.filters select:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-}
 .field select option,
 .filters select option {
   background: var(--surface);
@@ -288,83 +344,10 @@ nav.bottom::-webkit-scrollbar { display: none; }
   padding: 10px;
 }
 
-/* ===== Equity / R-Multiple curve chart ===== */
-.curve-wrap {
-  height: 200px;
-  width: 100%;
-  position: relative;
-  padding: 10px 0;
-}
-.curve-svg { width: 100%; height: 100%; display: block; }
-.curve-line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-.curve-area { fill: url(#curveGrad); opacity: .35; }
-.curve-dot { fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
-.curve-empty {
-  height: 200px; display: grid; place-items: center;
-  color: var(--text-dim); font-size: 13.5px; text-align: center;
-}
-.curve-empty strong { display: block; color: var(--text); font-size: 15px; margin-bottom: 4px; }
-
-/* ===== Streak card ===== */
-.streak-big {
-  font-size: 32px; font-weight: 800; letter-spacing: -0.03em;
-  margin-bottom: 6px;
-}
-.streak-big.pos { color: var(--green); }
-.streak-big.neg { color: var(--red); }
-.streak-label { font-size: 13.5px; color: var(--text-dim); line-height: 1.5; }
-
-/* ===== Direction stats ===== */
-.dir-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 0; border-bottom: 1px solid var(--border);
-}
-.dir-row:last-child { border-bottom: none; }
-.dir-name { font-weight: 700; font-size: 14.5px; }
-.dir-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-.dir-val { font-weight: 800; font-size: 16px; letter-spacing: -0.02em; }
-
-/* ===== Tabs (pill style) ===== */
-.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-.tab {
-  padding: 7px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
-  border: 1px solid var(--border); background: var(--surface);
-  color: var(--text-dim); transition: all .15s ease;
-}
-.tab:hover { color: var(--text); background: var(--surface-2); }
-.tab.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
-
-/* ===== Setup / Psychology items ===== */
-.setup-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 0; border-bottom: 1px solid var(--border);
-}
-.setup-row:last-child { border-bottom: none; }
-.setup-name { font-weight: 600; font-size: 13.5px; }
-.setup-meta { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; }
-.setup-val { font-weight: 800; font-size: 14px; letter-spacing: -0.02em; }
-
-/* ===== Risk result grid ===== */
-.risk-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 16px;
-}
-@media (max-width: 600px) {
-  .risk-grid { grid-template-columns: repeat(2, 1fr); }
-}
-.risk-box {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  padding: 12px;
-}
-.risk-box .k {
-  font-size: 11px; color: var(--text-dim); font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.04em;
-}
-.risk-box .v {
-  font-size: 16px; font-weight: 800; letter-spacing: -0.02em;
-  margin-top: 6px;
+@media (max-width: 480px) {
+  .page-head h1 { font-size: 22px; }
+  .stat-value { font-size: 20px; }
+  .modal { padding: 18px; }
+  .cal-day { min-height: 48px; padding: 4px; }
+  .cal-day .d-pnl { font-size: 10px; }
 }
