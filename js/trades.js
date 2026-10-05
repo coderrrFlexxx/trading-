@@ -13,6 +13,13 @@ function calcPnl(t) {
   return diff * qty;
 }
 
+function calcRMultiple(t) {
+  if (t.stop == null || t.stop === '' || t.entry == null || t.qty == null) return null;
+  var risk = Math.abs(Number(t.entry) - Number(t.stop)) * Number(t.qty);
+  if (!risk || risk === 0) return null;
+  return calcPnl(t) / risk;
+}
+
 function loadTrades() {
   trades = readStore(KEYS.trades, []);
   if (!Array.isArray(trades)) trades = [];
@@ -42,6 +49,8 @@ function openTradeModal(trade) {
   $('tStop').value = trade ? (trade.stop != null ? trade.stop : '') : '';
   $('tTarget').value = trade ? (trade.target != null ? trade.target : '') : '';
   $('tStrategy').value = trade ? (trade.strategy || '') : '';
+  $('tSetup').value = trade ? (trade.setup || '') : '';
+  $('tPsych').value = trade ? (trade.psych || '') : '';
   $('tNotes').value = trade ? (trade.notes || '') : '';
   $('saveTradeBtn').textContent = trade ? 'Update Trade' : 'Save Trade';
   openModal('tradeModal');
@@ -73,6 +82,8 @@ function submitTrade(e) {
     stop: $('tStop').value !== '' ? parseFloat($('tStop').value) : null,
     target: $('tTarget').value !== '' ? parseFloat($('tTarget').value) : null,
     strategy: ($('tStrategy').value || '').trim(),
+    setup: ($('tSetup').value || '').trim(),
+    psych: ($('tPsych').value || '').trim(),
     notes: ($('tNotes').value || '').trim(),
     createdAt: current ? (current.createdAt || Date.now()) : Date.now()
   };
