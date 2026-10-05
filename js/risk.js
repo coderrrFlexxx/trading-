@@ -1,6 +1,8 @@
 /* ============================================================
-   risk.js — Position size calculator
+   risk.js — Risk Calculator
    ============================================================ */
+
+var lastRiskCalc = null;
 
 function calcRisk() {
   var balance = parseFloat($('rBalance').value) || 0;
@@ -11,40 +13,55 @@ function calcRisk() {
   var side = $('rSide').value;
 
   var out = $('riskResult');
+  if (!out) return;
+
   if (!balance || !riskPct || !entry || !stop) {
-    out.innerHTML = '<div class="empty">Fill account balance, risk %, entry and stop loss to see results.</div>';
+    out.innerHTML =
+      '<div class="risk-box"><div class="k">₹ Risk</div><div class="v">—</div></div>' +
+      '<div class="risk-box"><div class="k">Risk / Unit</div><div class="v">—</div></div>' +
+      '<div class="risk-box"><div class="k">Position Size</div><div class="v">—</div></div>' +
+      '<div class="risk-box"><div class="k">R:R</div><div class="v">—</div></div>' +
+      '<div class="risk-box"><div class="k">Target Profit ₹</div><div class="v">—</div></div>' +
+      '<div class="risk-box"><div class="k">Capital Used ₹</div><div class="v">—</div></div>';
+    lastRiskCalc = null;
     return;
   }
 
   var riskAmount = (balance * riskPct) / 100;
   var perUnitRisk = Math.abs(entry - stop);
-  if (perUnitRisk <= 0) {
-    out.innerHTML = '<div class="empty">Stop loss must differ from entry price.</div>';
-    return;
-  }
+  if (perUnitRisk <= 0) { lastRiskCalc = null; return; }
 
   var qty = riskAmount / perUnitRisk;
   var positionValue = qty * entry;
-
-  var rr = 0;
+  var rr = 0, potentialProfit = 0;
   if (target && entry !== target) {
     var reward = Math.abs(target - entry);
     rr = reward / perUnitRisk;
+    potentialProfit = reward * qty;
   }
 
-  var potentialProfit = target ? Math.abs(target - entry) * qty : 0;
+  out.innerHTML =
+    '<div class="risk-box"><div class="k">₹ Risk</div><div class="v neg">' + fmtMoney(riskAmount) + '</div></div>' +
+    '<div class="risk-box"><div class="k">Risk / Unit</div><div class="v">' + fmtMoney(perUnitRisk) + '</div></div>' +
+    '<div class="risk-box"><div class="k">Position Size</div><div class="v">' + qty.toFixed(2) + '</div></div>' +
+    '<div class="risk-box"><div class="k">R:R</div><div class="v">' + (rr ? rr.toFixed(2) + ' : 1' : '—') + '</div></div>' +
+    '<div class="risk-box"><div class="k">Target Profit ₹</div><div class="v pos">' + (potentialProfit ? fmtMoney(potentialProfit) : '—') + '</div></div>' +
+    '<div class="risk-box"><div class="k">Capital Used ₹</div><div class="v">' + fmtMoney(positionValue) + '</div></div>';
 
-  var html = '<div class="mini-stats">' +
-    '<div class="mini"><div class="k">Risk Amount</div><div class="v neg">' + fmtMoney(riskAmount) + '</div></div>' +
-    '<div class="mini"><div class="k">Position Size</div><div class="v">' + qty.toFixed(2) + ' units</div></div>' +
-    '<div class="mini"><div class="k">Position Value</div><div class="v">' + fmtMoney(positionValue) + '</div></div>' +
-    '<div class="mini"><div class="k">Risk per Unit</div><div class="v">' + fmtMoney(perUnitRisk) + '</div></div>' +
-    (rr ? '<div class="mini"><div class="k">Risk : Reward</div><div class="v">' + rr.toFixed(2) + ' : 1</div></div>' : '') +
-    (potentialProfit ? '<div class="mini"><div class="k">Potential Profit</div><div class="v pos">' + fmtMoney(potentialProfit) + '</div></div>' : '') +
-    '<div class="mini"><div class="k">Direction</div><div class="v">' + side + '</div></div>' +
-  '</div>';
+  lastRiskCalc = {
+    entry: entry, stop: stop, target: target, qty: qty, side: side
+  };
+}
 
-  out.innerHTML = html;
+function useRiskInTrade() {
+  if (!lastRiskCalc) { toast('Fill the risk calculator first'); return; }
+  var d = lastRiskCalc;
+  openTradeModal();
+  $('tEntry').value = d.entry;
+  $('tStop').value = d.stop;
+  $('tTarget').value = d.target;
+  $('tQty').value = d.qty.toFixed(2);
+  $('tSide').value = d.side;
 }
 
 function initRisk() {
@@ -55,4 +72,7 @@ function initRisk() {
       el.addEventListener('change', calcRisk);
     }
   });
+  var btn = $('useInAddTrade');
+  if (btn) btn.addEventListener('click', useRiskInTrade);
+  calcRisk();
 }
