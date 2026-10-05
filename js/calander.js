@@ -1,5 +1,5 @@
 /* ============================================================
-   calendar.js — Monthly calendar view (FIXED)
+   calendar.js — Monthly calendar view
    ============================================================ */
 
 var calCurrent = new Date();
