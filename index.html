@@ -14,7 +14,7 @@
 <link rel="icon" type="image/svg+xml" href="icons/192.svg" />
 <link rel="apple-touch-icon" href="icons/192.svg" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=8" />
+<link rel="stylesheet" href="css/style.css?v=14" />
 </head>
 <body>
 
@@ -25,12 +25,12 @@
       <div>TradeVault</div>
     </div>
     <div class="topbar-actions">
-      <button class="icon-btn" id="themeBtn" title="Toggle theme">
-        <svg id="themeIcon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Toggle theme">
+        <svg id="themeIcon" viewBox="0 0 24 24" pointer-events="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
-      <button class="btn btn-primary" id="addTradeTop">
-        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <span>Add Trade</span>
+      <button class="btn btn-primary" id="addTradeTop" onclick="openTradeModal()">
+        <svg viewBox="0 0 24 24" pointer-events="none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span pointer-events="none">Add Trade</span>
       </button>
     </div>
   </header>
@@ -62,7 +62,7 @@
     </div>
     <div class="two-col">
       <div class="card">
-        <div class="card-head"><h2>Recent Trades</h2><button class="btn" data-goto="trades">View All</button></div>
+        <div class="card-head"><h2>Recent Trades</h2><button class="btn" onclick="go('trades')">View All</button></div>
         <div id="dashRecent"></div>
       </div>
       <div class="card">
@@ -88,9 +88,9 @@
     <div class="page-head"><h1>Calendar</h1><p>Monthly performance view</p></div>
     <div class="card">
       <div class="cal-head">
-        <button class="icon-btn" id="calPrev"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button class="icon-btn" onclick="calPrevMonth()"><svg viewBox="0 0 24 24" pointer-events="none"><polyline points="15 18 9 12 15 6"/></svg></button>
         <h2 id="calMonth">—</h2>
-        <button class="icon-btn" id="calNext"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+        <button class="icon-btn" onclick="calNextMonth()"><svg viewBox="0 0 24 24" pointer-events="none"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
       <div class="cal-weekdays">
         <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
@@ -148,7 +148,7 @@
   <section id="page-playbook" class="hidden">
     <div class="page-head"><h1>Playbook</h1><p>Your trading strategies and rules</p></div>
     <div class="card">
-      <div class="card-head"><h2>Strategies</h2><button class="btn btn-primary" id="addPlaybookBtn">New Strategy</button></div>
+      <div class="card-head"><h2>Strategies</h2><button class="btn btn-primary" onclick="openPlaybookModal()">New Strategy</button></div>
       <div id="playbookList"></div>
     </div>
   </section>
@@ -158,13 +158,13 @@
     <div class="card">
       <div class="card-head">
         <div><h2>Reviews</h2><p class="card-sub">Review process, not just money.</p></div>
-        <button class="btn btn-primary" id="addReviewBtn">Add Review</button>
+        <button class="btn btn-primary" onclick="openReviewModal()">Add Review</button>
       </div>
       <div class="tabs" id="reviewTabs">
-        <button class="tab active" data-period="all">All</button>
-        <button class="tab" data-period="daily">Daily</button>
-        <button class="tab" data-period="weekly">Weekly</button>
-        <button class="tab" data-period="monthly">Monthly</button>
+        <button class="tab active" data-period="all" onclick="setReviewTab(this)">All</button>
+        <button class="tab" data-period="daily" onclick="setReviewTab(this)">Daily</button>
+        <button class="tab" data-period="weekly" onclick="setReviewTab(this)">Weekly</button>
+        <button class="tab" data-period="monthly" onclick="setReviewTab(this)">Monthly</button>
       </div>
       <div id="reviewsList"></div>
     </div>
@@ -175,7 +175,7 @@
     <div class="card">
       <div class="card-head">
         <div><h2>Risk Calculator</h2><p class="card-sub">Calculate position size before entering a trade.</p></div>
-        <button class="btn" id="useInAddTrade">Use in Add Trade</button>
+        <button class="btn" onclick="useRiskInTrade()">Use in Add Trade</button>
       </div>
       <div class="form-grid">
         <div class="field"><label>Capital ₹</label><input type="number" id="rBalance" placeholder="50000" value="50000" /></div>
@@ -192,7 +192,7 @@
   <section id="page-backtesting" class="hidden">
     <div class="page-head"><h1>Backtesting</h1><p>Test your strategies historically</p></div>
     <div class="card">
-      <div class="card-head"><h2>Backtest Log</h2><button class="btn btn-primary" id="addBacktestBtn">New Backtest</button></div>
+      <div class="card-head"><h2>Backtest Log</h2><button class="btn btn-primary" onclick="openBacktestModal()">New Backtest</button></div>
       <div id="backtestList"></div>
     </div>
   </section>
@@ -212,10 +212,10 @@
     <div class="card">
       <div class="card-head"><h2>Data Management</h2></div>
       <div class="btn-row">
-        <button class="btn" id="exportBtn">Export JSON</button>
-        <button class="btn" id="importBtn">Import JSON</button>
-        <button class="btn btn-danger" id="clearBtn">Clear All Data</button>
-        <input type="file" id="importFile" accept="application/json" class="hidden" />
+        <button class="btn" onclick="exportAllData()">Export JSON</button>
+        <button class="btn" onclick="document.getElementById('importFile').click()">Import JSON</button>
+        <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
+        <input type="file" id="importFile" accept="application/json" class="hidden" onchange="handleImportFile(this)" />
       </div>
     </div>
     <div class="card">
@@ -226,15 +226,15 @@
 </div>
 
 <nav class="bottom" id="bottomNav">
-  <button class="nav-item active" data-page="dashboard"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span>Home</span></button>
-  <button class="nav-item" data-page="trades"><svg viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg><span>Trades</span></button>
-  <button class="nav-item" data-page="calendar"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Calendar</span></button>
-  <button class="nav-item" data-page="analytics"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg><span>Analytics</span></button>
-  <button class="nav-item" data-page="playbook"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Playbook</span></button>
-  <button class="nav-item" data-page="reviews"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>Reviews</span></button>
-  <button class="nav-item" data-page="risk"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg><span>Risk</span></button>
-  <button class="nav-item" data-page="backtesting"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Backtest</span></button>
-  <button class="nav-item" data-page="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Settings</span></button>
+  <button class="nav-item active" data-page="dashboard" onclick="go('dashboard')"><svg viewBox="0 0 24 24" pointer-events="none"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span pointer-events="none">Home</span></button>
+  <button class="nav-item" data-page="trades" onclick="go('trades')"><svg viewBox="0 0 24 24" pointer-events="none"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg><span pointer-events="none">Trades</span></button>
+  <button class="nav-item" data-page="calendar" onclick="go('calendar')"><svg viewBox="0 0 24 24" pointer-events="none"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span pointer-events="none">Calendar</span></button>
+  <button class="nav-item" data-page="analytics" onclick="go('analytics')"><svg viewBox="0 0 24 24" pointer-events="none"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg><span pointer-events="none">Analytics</span></button>
+  <button class="nav-item" data-page="playbook" onclick="go('playbook')"><svg viewBox="0 0 24 24" pointer-events="none"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span pointer-events="none">Playbook</span></button>
+  <button class="nav-item" data-page="reviews" onclick="go('reviews')"><svg viewBox="0 0 24 24" pointer-events="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span pointer-events="none">Reviews</span></button>
+  <button class="nav-item" data-page="risk" onclick="go('risk')"><svg viewBox="0 0 24 24" pointer-events="none"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg><span pointer-events="none">Risk</span></button>
+  <button class="nav-item" data-page="backtesting" onclick="go('backtesting')"><svg viewBox="0 0 24 24" pointer-events="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span pointer-events="none">Backtest</span></button>
+  <button class="nav-item" data-page="settings" onclick="go('settings')"><svg viewBox="0 0 24 24" pointer-events="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span pointer-events="none">Settings</span></button>
 </nav>
 
 <!-- TRADE MODAL -->
@@ -242,35 +242,27 @@
   <div class="modal">
     <div class="modal-head">
       <h3 id="tradeModalTitle">New Trade</h3>
-      <button class="close-x" data-close="tradeModal" aria-label="Close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button class="close-x" onclick="closeTradeModal()" aria-label="Close"><svg viewBox="0 0 24 24" pointer-events="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <form id="tradeForm" class="form-grid" autocomplete="off">
       <input type="hidden" id="tradeId" />
-
       <div class="field"><label>Date *</label><input type="date" id="tDate" required /></div>
       <div class="field"><label>Symbol *</label><input type="text" id="tSymbol" placeholder="NIFTY / RELIANCE" required /></div>
-
       <div class="field"><label>Direction *</label><select id="tSide"><option value="BUY">Long</option><option value="SELL">Short</option></select></div>
       <div class="field"><label>Setup</label><input type="text" id="tSetup" placeholder="Your setup" /></div>
-
       <div class="field"><label>Timeframe</label><input type="text" id="tTimeframe" placeholder="5m / 15m / 1H" /></div>
       <div class="field"><label>Quantity *</label><input type="number" step="any" id="tQty" required /></div>
-
       <div class="field"><label>Entry *</label><input type="number" step="any" id="tEntry" required /></div>
       <div class="field"><label>Exit *</label><input type="number" step="any" id="tExit" required /></div>
-
       <div class="field"><label>Stop Loss</label><input type="number" step="any" id="tStop" /></div>
       <div class="field"><label>Target</label><input type="number" step="any" id="tTarget" /></div>
-
       <div class="field"><label>Net P&L ₹</label><input type="number" step="any" id="tNetPnl" placeholder="After charges" /></div>
-      <div class="field"><label>Result R</label><input type="number" step="any" id="tResultR" placeholder="Auto-calculated" /></div>
-
+      <div class="field"><label>Result R</label><input type="number" step="any" id="tResultR" placeholder="Auto" /></div>
       <div class="full mini-grid-3">
         <div class="mini-box"><div class="k">Risk ₹</div><div class="v" id="tRiskAmt">—</div></div>
         <div class="mini-box"><div class="k">Risk %</div><div class="v" id="tRiskPct">—</div></div>
         <div class="mini-box"><div class="k">Planned R:R</div><div class="v" id="tPlannedRR">—</div></div>
       </div>
-
       <div class="field full">
         <label>Rule adherence</label>
         <select id="tAdherence">
@@ -279,34 +271,29 @@
           <option value="broke">Broke rules</option>
         </select>
       </div>
-
       <div class="field"><label>Emotion before trade</label><input type="text" id="tEmotion" placeholder="Calm / FOMO / revenge" /></div>
-      <div class="field"><label>Mistake / violation</label><input type="text" id="tMistake" placeholder="e.g. Early exit, oversize" /></div>
-
+      <div class="field"><label>Mistake / violation</label><input type="text" id="tMistake" placeholder="e.g. Early exit" /></div>
       <div class="field"><label>Entry reason</label><textarea id="tEntryReason" placeholder="Why did you enter?"></textarea></div>
       <div class="field"><label>Exit reason</label><textarea id="tExitReason" placeholder="Why did you exit?"></textarea></div>
-
       <div class="field full"><label>Notes</label><textarea id="tNotes" placeholder="Add your notes..."></textarea></div>
-
       <div class="field full">
         <label>Chart Screenshots</label>
         <div class="img-upload-btns">
           <label class="btn img-btn" for="tCamera">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            Camera
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span pointer-events="none">Camera</span>
           </label>
           <label class="btn img-btn" for="tGallery">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            Gallery
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span pointer-events="none">Gallery</span>
           </label>
         </div>
         <input type="file" id="tCamera" accept="image/*" capture="environment" class="hidden" />
         <input type="file" id="tGallery" accept="image/*" multiple class="hidden" />
         <div class="img-preview" id="tPreview"></div>
       </div>
-
       <div class="full modal-actions">
-        <button type="button" class="btn" data-close="tradeModal">Cancel</button>
+        <button type="button" class="btn" onclick="closeTradeModal()">Cancel</button>
         <button type="submit" class="btn btn-primary" id="saveTradeBtn">Save Trade</button>
       </div>
     </form>
@@ -318,7 +305,7 @@
   <div class="modal">
     <div class="modal-head">
       <h3 id="playbookModalTitle">New Strategy</h3>
-      <button class="close-x" data-close="playbookModal"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button class="close-x" onclick="closePlaybookModal()" aria-label="Close"><svg viewBox="0 0 24 24" pointer-events="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <form id="playbookForm" class="form-grid" autocomplete="off">
       <input type="hidden" id="pbId" />
@@ -326,7 +313,7 @@
       <div class="field full"><label>Description</label><textarea id="pbDesc"></textarea></div>
       <div class="field full"><label>Rules (one per line)</label><textarea id="pbRules"></textarea></div>
       <div class="full modal-actions">
-        <button type="button" class="btn" data-close="playbookModal">Cancel</button>
+        <button type="button" class="btn" onclick="closePlaybookModal()">Cancel</button>
         <button type="submit" class="btn btn-primary">Save Strategy</button>
       </div>
     </form>
@@ -338,7 +325,7 @@
   <div class="modal">
     <div class="modal-head">
       <h3 id="reviewModalTitle">New Review</h3>
-      <button class="close-x" data-close="reviewModal"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button class="close-x" onclick="closeReviewModal()" aria-label="Close"><svg viewBox="0 0 24 24" pointer-events="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <form id="reviewForm" class="form-grid" autocomplete="off">
       <input type="hidden" id="rvId" />
@@ -351,7 +338,7 @@
       <div class="field full"><label>What Failed</label><textarea id="rvFailed"></textarea></div>
       <div class="field full"><label>Key Lessons</label><textarea id="rvLessons"></textarea></div>
       <div class="full modal-actions">
-        <button type="button" class="btn" data-close="reviewModal">Cancel</button>
+        <button type="button" class="btn" onclick="closeReviewModal()">Cancel</button>
         <button type="submit" class="btn btn-primary">Save Review</button>
       </div>
     </form>
@@ -363,7 +350,7 @@
   <div class="modal">
     <div class="modal-head">
       <h3 id="backtestModalTitle">New Backtest</h3>
-      <button class="close-x" data-close="backtestModal"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button class="close-x" onclick="closeBacktestModal()" aria-label="Close"><svg viewBox="0 0 24 24" pointer-events="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <form id="backtestForm" class="form-grid" autocomplete="off">
       <input type="hidden" id="btId" />
@@ -378,7 +365,7 @@
       <div class="field"><label>Max Drawdown (₹)</label><input type="number" step="any" id="btDD" /></div>
       <div class="field full"><label>Notes</label><textarea id="btNotes"></textarea></div>
       <div class="full modal-actions">
-        <button type="button" class="btn" data-close="backtestModal">Cancel</button>
+        <button type="button" class="btn" onclick="closeBacktestModal()">Cancel</button>
         <button type="submit" class="btn btn-primary">Save Backtest</button>
       </div>
     </form>
@@ -390,40 +377,41 @@
   <div class="modal">
     <div class="modal-head">
       <h3>Trade Details</h3>
-      <button class="close-x" data-close="detailModal" aria-label="Close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button class="close-x" onclick="closeModal('detailModal')" aria-label="Close"><svg viewBox="0 0 24 24" pointer-events="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div id="detailBody"></div>
     <div class="modal-actions" style="margin-top:20px">
-      <button type="button" class="btn" data-close="detailModal">Close</button>
+      <button type="button" class="btn" onclick="closeModal('detailModal')">Close</button>
     </div>
   </div>
 </div>
 
+<!-- CONFIRM MODAL -->
 <div class="modal-backdrop" id="confirmModal">
   <div class="modal modal-sm">
     <div class="modal-head">
       <h3 id="confirmTitle">Confirm</h3>
-      <button class="close-x" data-close="confirmModal"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button class="close-x" onclick="closeModal('confirmModal')" aria-label="Close"><svg viewBox="0 0 24 24" pointer-events="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <p id="confirmMsg" class="about-text" style="margin-bottom:18px"></p>
     <div class="modal-actions">
-      <button type="button" class="btn" data-close="confirmModal">Cancel</button>
-      <button type="button" class="btn btn-danger" id="confirmOk">Confirm</button>
+      <button type="button" class="btn" onclick="closeModal('confirmModal')">Cancel</button>
+      <button type="button" class="btn btn-danger" id="confirmOk" onclick="confirmOkHandler()">Confirm</button>
     </div>
   </div>
 </div>
 
 <div id="toast"></div>
 
-<script src="js/ui.js?v=8"></script>
-<script src="js/storage.js?v=8"></script>
-<script src="js/trades.js?v=8"></script>
-<script src="js/analytics.js?v=8"></script>
-<script src="js/playbook.js?v=8"></script>
-<script src="js/reviews.js?v=8"></script>
-<script src="js/risk.js?v=8"></script>
-<script src="js/backtesting.js?v=8"></script>
-<script src="js/settings.js?v=8"></script>
-<script src="js/app.js?v=8"></script>
+<script src="js/ui.js?v=14"></script>
+<script src="js/storage.js?v=14"></script>
+<script src="js/trades.js?v=14"></script>
+<script src="js/analytics.js?v=14"></script>
+<script src="js/playbook.js?v=14"></script>
+<script src="js/reviews.js?v=14"></script>
+<script src="js/risk.js?v=14"></script>
+<script src="js/backtesting.js?v=14"></script>
+<script src="js/settings.js?v=14"></script>
+<script src="js/app.js?v=14"></script>
 </body>
 </html>
