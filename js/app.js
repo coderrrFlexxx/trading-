@@ -1,5 +1,5 @@
 /* ============================================================
-   app.js — Navigation, calendar, init
+   app.js — Navigation, calendar, direct bindings
    ============================================================ */
 
 var currentPage = 'dashboard';
@@ -13,11 +13,12 @@ function go(page) {
   currentPage = page;
 
   PAGES.forEach(function (p) {
-    var sec = $('page-' + p);
+    var sec = document.getElementById('page-' + p);
     if (sec) sec.classList.toggle('hidden', p !== page);
   });
 
-  $$('.nav-item').forEach(function (b) {
+  var navItems = document.querySelectorAll('.nav-item');
+  Array.prototype.forEach.call(navItems, function (b) {
     b.classList.toggle('active', b.dataset.page === page);
   });
 
@@ -34,6 +35,42 @@ function go(page) {
   } catch (err) { console.error('Render error:', err); }
 }
 
+function calPrevMonth() {
+  calCurrent.setMonth(calCurrent.getMonth() - 1);
+  renderCalendar();
+}
+
+function calNextMonth() {
+  calCurrent.setMonth(calCurrent.getMonth() + 1);
+  renderCalendar();
+}
+
+function setReviewTab(btn) {
+  var tabs = document.querySelectorAll('#reviewTabs .tab');
+  Array.prototype.forEach.call(tabs, function (t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  if (typeof reviewPeriodFilter !== 'undefined') {
+    reviewPeriodFilter = btn.dataset.period;
+  }
+  if (typeof renderReviews === 'function') renderReviews();
+}
+
+function confirmOkHandler() {
+  if (typeof closeModal === 'function') closeModal('confirmModal');
+  if (typeof _confirmCallback === 'function') {
+    var cb = _confirmCallback;
+    _confirmCallback = null;
+    cb();
+  }
+}
+
+function handleImportFile(input) {
+  if (input && input.files && input.files[0] && typeof importAllData === 'function') {
+    importAllData(input.files[0]);
+  }
+  input.value = '';
+}
+
 function renderCalendar() {
   try {
     var year = calCurrent.getFullYear();
@@ -41,10 +78,10 @@ function renderCalendar() {
     var monthNames = ['January','February','March','April','May','June',
                       'July','August','September','October','November','December'];
 
-    var monthEl = $('calMonth');
+    var monthEl = document.getElementById('calMonth');
     if (monthEl) monthEl.textContent = monthNames[month] + ' ' + year;
 
-    var gridEl = $('calGrid');
+    var gridEl = document.getElementById('calGrid');
     if (!gridEl) return;
 
     var firstDay = new Date(year, month, 1).getDay();
@@ -53,7 +90,8 @@ function renderCalendar() {
     var isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
 
     var byDate = {};
-    (typeof trades !== 'undefined' && trades ? trades : []).forEach(function (t) {
+    var trList = (typeof trades !== 'undefined' && trades) ? trades : [];
+    trList.forEach(function (t) {
       if (!t.date) return;
       var d = String(t.date).slice(0, 10);
       if (!byDate[d]) byDate[d] = { pnl: 0, count: 0 };
@@ -93,7 +131,7 @@ function renderCalendar() {
 
     gridEl.innerHTML = html;
 
-    var summary = $('calSummary');
+    var summary = document.getElementById('calSummary');
     if (summary) {
       summary.innerHTML =
         '<div class="mini"><div class="k">Month P&L</div><div class="v ' + (monthPnl > 0 ? 'pos' : monthPnl < 0 ? 'neg' : '') + '">' + fmtShort(monthPnl) + '</div></div>' +
@@ -106,9 +144,9 @@ function renderCalendar() {
 
 function renderTrades() {
   try {
-    var q = ($('filterSearch').value || '').toLowerCase();
-    var side = $('filterSide').value;
-    var res = $('filterResult').value;
+    var q = (document.getElementById('filterSearch').value || '').toLowerCase();
+    var side = document.getElementById('filterSide').value;
+    var res = document.getElementById('filterResult').value;
 
     var list = tradesSorted();
     if (q) list = list.filter(function (t) { return (t.symbol || '').toLowerCase().indexOf(q) > -1; });
@@ -116,7 +154,7 @@ function renderTrades() {
     if (res === 'win') list = list.filter(function (t) { return calcPnl(t) > 0; });
     if (res === 'loss') list = list.filter(function (t) { return calcPnl(t) < 0; });
 
-    var cont = $('tradesList');
+    var cont = document.getElementById('tradesList');
     if (!list.length) {
       cont.innerHTML = '<div class="empty">No trades match your filters.</div>';
       return;
@@ -125,153 +163,44 @@ function renderTrades() {
   } catch (err) { console.error('Trades render error:', err); }
 }
 
-/* Helper: walk up parents (works with SVG) */
-function findParentWithId(el, id) {
-  var cur = el;
-  var depth = 0;
-  while (cur && depth < 15) {
-    if (cur.id === id) return cur;
-    if (cur.classList && cur.classList.contains(id.replace('#',''))) return cur;
-    cur = cur.parentNode;
-    depth++;
-  }
-  return null;
-}
-
-/* ============================================================
-   MASTER CLICK HANDLER
-   ============================================================ */
-function masterClickHandler(e) {
+/* Global click handler for VIEW/EDIT/DEL buttons (rendered dynamically) */
+function globalClickHandler(e) {
   var target = e.target;
+  var actionEl = target.closest ? target.closest('[data-action]') : null;
+  if (!actionEl) return;
 
-  // 1. Bottom nav
-  var navBtn = target.closest ? target.closest('.nav-item') : null;
-  if (navBtn && navBtn.dataset.page) {
-    e.preventDefault();
-    go(navBtn.dataset.page);
-    return;
-  }
-
-  // 2. View/Edit/Delete actions
-  var actionBtn = target.closest ? target.closest('[data-action]') : null;
-  if (actionBtn) {
-    var action = actionBtn.dataset.action;
-    var id = actionBtn.dataset.id;
-    try {
-      if (action === 'edit-trade') editTrade(id);
-      else if (action === 'delete-trade') deleteTrade(id);
-      else if (action === 'view-trade') viewTradeDetail(id);
-      else if (action === 'edit-playbook') editPlaybook(id);
-      else if (action === 'delete-playbook') deletePlaybook(id);
-      else if (action === 'edit-review') editReview(id);
-      else if (action === 'delete-review') deleteReview(id);
-      else if (action === 'edit-backtest') editBacktest(id);
-      else if (action === 'delete-backtest') deleteBacktest(id);
-    } catch (err) { console.error('Action error:', err); }
-    return;
-  }
-
-  // 3. Close modal
-  var closeBtn = target.closest ? target.closest('[data-close]') : null;
-  if (closeBtn) {
-    closeModal(closeBtn.dataset.close);
-    if (closeBtn.dataset.close === 'tradeModal' && typeof editingTradeId !== 'undefined') editingTradeId = null;
-    if (closeBtn.dataset.close === 'playbookModal' && typeof editingPlaybookId !== 'undefined') editingPlaybookId = null;
-    if (closeBtn.dataset.close === 'reviewModal' && typeof editingReviewId !== 'undefined') editingReviewId = null;
-    if (closeBtn.dataset.close === 'backtestModal' && typeof editingBacktestId !== 'undefined') editingBacktestId = null;
-    return;
-  }
-
-  // 4. Goto buttons
-  var gotoBtn = target.closest ? target.closest('[data-goto]') : null;
-  if (gotoBtn && gotoBtn.dataset.goto) {
-    go(gotoBtn.dataset.goto);
-    return;
-  }
-
-  // 5. Add Trade (with SVG-safe parent walk)
-  if (findParentWithId(target, 'addTradeTop')) {
-    e.preventDefault();
-    if (typeof openTradeModal === 'function') openTradeModal();
-    return;
-  }
-
-  // 6. Theme toggle
-  if (findParentWithId(target, 'themeBtn')) {
-    e.preventDefault();
-    toggleTheme();
-    return;
-  }
-
-  // 7. Remove screenshot
-  var rem = target.closest ? target.closest('[data-remove-img]') : null;
-  if (rem && typeof removeScreenshot === 'function') {
-    removeScreenshot(parseInt(rem.dataset.removeImg, 10));
-    return;
-  }
-
-  // 8. Calendar prev/next
-  if (findParentWithId(target, 'calPrev')) {
-    calCurrent.setMonth(calCurrent.getMonth() - 1);
-    renderCalendar();
-    return;
-  }
-  if (findParentWithId(target, 'calNext')) {
-    calCurrent.setMonth(calCurrent.getMonth() + 1);
-    renderCalendar();
-    return;
-  }
-
-  // 9. Add Playbook / Review / Backtest
-  if (findParentWithId(target, 'addPlaybookBtn') && typeof openPlaybookModal === 'function') { openPlaybookModal(); return; }
-  if (findParentWithId(target, 'addReviewBtn') && typeof openReviewModal === 'function') { openReviewModal(); return; }
-  if (findParentWithId(target, 'addBacktestBtn') && typeof openBacktestModal === 'function') { openBacktestModal(); return; }
-
-  // 10. Modal backdrop
-  if (target.classList && target.classList.contains('modal-backdrop') && target.classList.contains('show')) {
-    closeModal(target.id);
-    return;
-  }
-
-  // 11. Confirm OK
-  if (findParentWithId(target, 'confirmOk')) {
-    closeModal('confirmModal');
-    if (typeof _confirmCallback === 'function') {
-      var cb = _confirmCallback;
-      _confirmCallback = null;
-      cb();
-    }
-    return;
-  }
+  var action = actionEl.dataset.action;
+  var id = actionEl.dataset.id;
+  try {
+    if (action === 'edit-trade') editTrade(id);
+    else if (action === 'delete-trade') deleteTrade(id);
+    else if (action === 'view-trade') viewTradeDetail(id);
+    else if (action === 'edit-playbook') editPlaybook(id);
+    else if (action === 'delete-playbook') deletePlaybook(id);
+    else if (action === 'edit-review') editReview(id);
+    else if (action === 'delete-review') deleteReview(id);
+    else if (action === 'edit-backtest') editBacktest(id);
+    else if (action === 'delete-backtest') deleteBacktest(id);
+  } catch (err) { console.error('Action error:', err); }
 }
 
-function masterKeyHandler(e) {
-  if (e.key === 'Escape') {
-    var open = document.querySelector('.modal-backdrop.show');
-    if (open) closeModal(open.id);
-  }
-}
-
-function masterChangeHandler(e) {
+function globalChangeHandler(e) {
   var t = e.target;
   if (!t || !t.id) return;
-
   if (t.id === 'filterSide' || t.id === 'filterResult') { renderTrades(); return; }
   if (t.id === 'anPeriod') { if (typeof renderAnalytics === 'function') renderAnalytics(); return; }
   if (t.id === 'themeSelect') { applyTheme(t.value); return; }
   if (t.id === 'tCamera' && typeof handleImageFiles === 'function') { handleImageFiles(t.files); t.value = ''; return; }
   if (t.id === 'tGallery' && typeof handleImageFiles === 'function') { handleImageFiles(t.files); t.value = ''; return; }
-  if (t.id === 'importFile' && typeof importData === 'function' && t.files[0]) { importData(t.files[0]); t.value = ''; return; }
   if (t.id === 'rSide' || t.id === 'rBalance' || t.id === 'rRiskPct' || t.id === 'rEntry' || t.id === 'rStop' || t.id === 'rTarget') {
     if (typeof calcRisk === 'function') calcRisk();
     return;
   }
 }
 
-function masterInputHandler(e) {
+function globalInputHandler(e) {
   var t = e.target;
   if (!t || !t.id) return;
-
   if (t.id === 'filterSearch') { renderTrades(); return; }
   if (t.id === 'anSymbol') { if (typeof renderAnalytics === 'function') renderAnalytics(); return; }
   if (t.id === 'tEntry' || t.id === 'tStop' || t.id === 'tTarget' || t.id === 'tQty') {
@@ -284,7 +213,7 @@ function masterInputHandler(e) {
   }
 }
 
-function masterSubmitHandler(e) {
+function globalSubmitHandler(e) {
   var f = e.target;
   if (!f || !f.id) return;
   if (f.id === 'tradeForm' && typeof submitTrade === 'function') { submitTrade(e); return; }
@@ -293,54 +222,23 @@ function masterSubmitHandler(e) {
   if (f.id === 'backtestForm' && typeof submitBacktest === 'function') { submitBacktest(e); return; }
 }
 
-/* ============================================================
-   DIRECT BUTTON BINDINGS (fail-safe for SVG-inside-buttons)
-   ============================================================ */
-function bindDirectButtons() {
-  // Add Trade — top bar button
-  var addTop = document.getElementById('addTradeTop');
-  if (addTop) {
-    addTop.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (typeof openTradeModal === 'function') openTradeModal();
-    }, true); // capture phase to run before bubbling
+function globalKeyHandler(e) {
+  if (e.key === 'Escape') {
+    var open = document.querySelector('.modal-backdrop.show');
+    if (open) closeModal(open.id);
   }
+}
 
-  // Theme toggle
-  var themeBtn = document.getElementById('themeBtn');
-  if (themeBtn) {
-    themeBtn.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleTheme();
-    }, true);
+function globalBackdropClick(e) {
+  if (e.target.classList && e.target.classList.contains('modal-backdrop') && e.target.classList.contains('show')) {
+    closeModal(e.target.id);
   }
-
-  // Add Playbook / Review / Backtest — buttons without SVG but for safety
-  var ap = document.getElementById('addPlaybookBtn');
-  if (ap) ap.addEventListener('click', function (e) {
-    e.preventDefault();
-    if (typeof openPlaybookModal === 'function') openPlaybookModal();
-  }, true);
-
-  var ar = document.getElementById('addReviewBtn');
-  if (ar) ar.addEventListener('click', function (e) {
-    e.preventDefault();
-    if (typeof openReviewModal === 'function') openReviewModal();
-  }, true);
-
-  var ab = document.getElementById('addBacktestBtn');
-  if (ab) ab.addEventListener('click', function (e) {
-    e.preventDefault();
-    if (typeof openBacktestModal === 'function') openBacktestModal();
-  }, true);
 }
 
 function init() {
   try {
     var savedTheme = null;
-    try { savedTheme = localStorage.getItem(KEYS.theme); } catch (e) {}
+    try { savedTheme = localStorage.getItem('tradevault.theme.v5'); } catch (e) {}
     applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
 
     if (typeof loadTrades === 'function') loadTrades();
@@ -351,15 +249,17 @@ function init() {
     try { if (typeof initCustomSelects === 'function') initCustomSelects(); }
     catch (e) { console.error('Custom selects failed:', e); }
 
-    // Direct listeners FIRST (fail-safe)
-    bindDirectButtons();
+    document.addEventListener('click', globalClickHandler, false);
+    document.addEventListener('change', globalChangeHandler, true);
+    document.addEventListener('input', globalInputHandler, true);
+    document.addEventListener('submit', globalSubmitHandler, false);
+    document.addEventListener('keydown', globalKeyHandler, false);
 
-    // Master listeners (delegation for everything else)
-    document.addEventListener('click', masterClickHandler, false);
-    document.addEventListener('keydown', masterKeyHandler, false);
-    document.addEventListener('change', masterChangeHandler, true);
-    document.addEventListener('input', masterInputHandler, true);
-    document.addEventListener('submit', masterSubmitHandler, false);
+    // Backdrop close (attach to each modal)
+    var modals = document.querySelectorAll('.modal-backdrop');
+    Array.prototype.forEach.call(modals, function (m) {
+      m.addEventListener('click', globalBackdropClick);
+    });
 
     if (typeof initReviewTabs === 'function') initReviewTabs();
     if (typeof initRisk === 'function') initRisk();
