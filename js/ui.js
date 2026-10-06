@@ -1,5 +1,5 @@
 /* ============================================================
-   ui.js — Helpers + Custom Dropdown system
+   ui.js — Helpers + Safe Custom Dropdown
    ============================================================ */
 
 var THEME_KEY = 'tradevault.theme.v5';
@@ -45,7 +45,6 @@ function toast(msg) {
   el._t = setTimeout(function () { el.classList.remove('show'); }, 2200);
 }
 
-/* ---------- Theme ---------- */
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
 
@@ -55,7 +54,7 @@ function applyTheme(theme) {
   var sel = $('themeSelect');
   if (sel) {
     sel.value = theme;
-    if (sel._csUpdate) sel._csUpdate();
+    if (sel._csRefresh) sel._csRefresh();
   }
 
   var icon = $('themeIcon');
@@ -72,7 +71,6 @@ function toggleTheme() {
   applyTheme(cur === 'dark' ? 'light' : 'dark');
 }
 
-/* ---------- Modal helpers ---------- */
 function openModal(id) {
   var el = $(id);
   if (el) el.classList.add('show');
@@ -96,137 +94,137 @@ function showConfirm(title, message, callback) {
 }
 
 /* ============================================================
-   CUSTOM SELECT SYSTEM
-   Replaces every <select> with a styled dropdown
+   SAFE CUSTOM DROPDOWN
    ============================================================ */
 
-function initCustomSelects() {
-  var allSelects = document.querySelectorAll('select');
+function initCustomSelects(root) {
+  var container = root || document;
+  var selects;
+  try { selects = container.querySelectorAll('select:not([data-cs-init])'); }
+  catch (e) { return; }
 
-  Array.prototype.forEach.call(allSelects, function (sel) {
-    if (sel.dataset.csReady === '1') return;
-    sel.dataset.csReady = '1';
+  Array.prototype.forEach.call(selects, function (sel) {
+    try { setupCustomSelect(sel); }
+    catch (err) { console.error('Custom select error:', err); }
+  });
+}
 
-    // Wrapper
-    var wrap = document.createElement('div');
-    wrap.className = 'cs-wrap';
-    sel.parentNode.insertBefore(wrap, sel);
-    wrap.appendChild(sel);
-    sel.classList.add('cs-native');
+function setupCustomSelect(sel) {
+  if (sel.dataset.csInit === '1') return;
+  sel.dataset.csInit = '1';
 
-    // Trigger button
-    var trigger = document.createElement('button');
-    trigger.type = 'button';
-    trigger.className = 'cs-trigger';
-    trigger.innerHTML =
-      '<span class="cs-label"></span>' +
-      '<svg class="cs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
-    wrap.appendChild(trigger);
+  var wrap = document.createElement('div');
+  wrap.className = 'cs-wrap';
+  sel.parentNode.insertBefore(wrap, sel);
+  wrap.appendChild(sel);
+  sel.classList.add('cs-native');
 
-    // Menu
-    var menu = document.createElement('div');
-    menu.className = 'cs-menu';
-    wrap.appendChild(menu);
+  var trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'cs-trigger';
+  trigger.innerHTML = '<span class="cs-label"></span>' +
+    '<svg class="cs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+  wrap.appendChild(trigger);
 
-    var labelEl = trigger.querySelector('.cs-label');
+  var menu = document.createElement('div');
+  menu.className = 'cs-menu';
+  wrap.appendChild(menu);
 
-    function getSelectedText() {
-      var opt = sel.options[sel.selectedIndex];
-      return opt ? opt.textContent : '';
-    }
+  var labelEl = trigger.querySelector('.cs-label');
 
-    function refresh() {
-      labelEl.textContent = getSelectedText();
-      var opts = menu.querySelectorAll('.cs-option');
-      Array.prototype.forEach.call(opts, function (o) {
-        o.classList.toggle('active', o.dataset.value === sel.value);
-      });
-    }
+  function buildMenu() {
+    menu.innerHTML = '';
+    Array.prototype.forEach.call(sel.options, function (opt) {
+      var item = document.createElement('div');
+      item.className = 'cs-option';
+      if (opt.value === sel.value) item.classList.add('active');
+      item.textContent = opt.textContent;
+      item.setAttribute('data-cs-value', opt.value);
+      menu.appendChild(item);
+    });
+  }
 
-    function buildMenu() {
-      menu.innerHTML = '';
-      Array.prototype.forEach.call(sel.options, function (opt) {
-        var item = document.createElement('div');
-        item.className = 'cs-option';
-        item.textContent = opt.textContent;
-        item.dataset.value = opt.value;
-        if (opt.value === sel.value) item.classList.add('active');
-        item.addEventListener('click', function (e) {
-          e.stopPropagation();
-          sel.value = opt.value;
-          wrap.classList.remove('open');
+  function refresh() {
+    var opt = sel.options[sel.selectedIndex];
+    labelEl.textContent = opt ? opt.textContent : '';
+    Array.prototype.forEach.call(menu.querySelectorAll('.cs-option'), function (o) {
+      o.classList.toggle('active', o.getAttribute('data-cs-value') === sel.value);
+    });
+  }
+
+  // Instance-level value override — safe, wrapped in try/catch
+  try {
+    var protoDesc = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+    if (protoDesc && protoDesc.get && protoDesc.set) {
+      Object.defineProperty(sel, 'value', {
+        configurable: true,
+        enumerable: true,
+        get: function () { return protoDesc.get.call(sel); },
+        set: function (v) {
+          protoDesc.set.call(sel, v);
           refresh();
-          var evt = new Event('change', { bubbles: true });
-          sel.dispatchEvent(evt);
-          // Also fire input for input listeners
-          var evt2 = new Event('input', { bubbles: true });
-          sel.dispatchEvent(evt2);
-        });
-        menu.appendChild(item);
+        }
       });
     }
+  } catch (e) { /* ignore - fallback works */ }
 
-    function openMenu() {
-      // close all other open menus first
+  trigger.addEventListener('click', function (e) {
+    e.stopPropagation();
+    e.preventDefault();
+    if (wrap.classList.contains('open')) {
+      wrap.classList.remove('open');
+    } else {
       Array.prototype.forEach.call(document.querySelectorAll('.cs-wrap.open'), function (w) {
-        if (w !== wrap) w.classList.remove('open');
+        w.classList.remove('open');
       });
       buildMenu();
       wrap.classList.add('open');
     }
-
-    trigger.addEventListener('click', function (e) {
-      e.stopPropagation();
-      if (wrap.classList.contains('open')) {
-        wrap.classList.remove('open');
-      } else {
-        openMenu();
-      }
-    });
-
-    // Override value setter so programmatic .value updates label automatically
-    try {
-      var protoDesc = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
-      if (protoDesc && protoDesc.configurable !== false) {
-        Object.defineProperty(sel, 'value', {
-          configurable: true,
-          enumerable: true,
-          get: function () { return protoDesc.get.call(sel); },
-          set: function (v) {
-            protoDesc.set.call(sel, v);
-            refresh();
-          }
-        });
-      }
-    } catch (e) {}
-
-    // Watch external change events
-    sel.addEventListener('change', refresh);
-
-    // Expose refresh
-    sel._csUpdate = refresh;
-
-    // Initial
-    refresh();
   });
 
-  // Global close on outside click
-  if (!document._csGlobalBound) {
-    document._csGlobalBound = true;
-    document.addEventListener('click', function () {
-      Array.prototype.forEach.call(document.querySelectorAll('.cs-wrap.open'), function (w) {
-        w.classList.remove('open');
-      });
-    });
-  }
+  menu.addEventListener('click', function (e) {
+    var item = e.target.closest ? e.target.closest('.cs-option') : null;
+    if (!item) return;
+    e.stopPropagation();
+    e.preventDefault();
+    var newVal = item.getAttribute('data-cs-value');
+    sel.value = newVal;
+    wrap.classList.remove('open');
+    try { sel.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
+    try { sel.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
+  });
+
+  sel.addEventListener('change', refresh);
+
+  sel._csRefresh = refresh;
+  refresh();
 }
 
-function refreshCustomSelectsIn(containerId) {
-  var c = typeof containerId === 'string' ? $(containerId) : containerId;
-  if (!c) return;
-  Array.prototype.forEach.call(c.querySelectorAll('select'), function (s) {
-    if (s._csUpdate) s._csUpdate();
+function closeAllCustomSelects() {
+  Array.prototype.forEach.call(document.querySelectorAll('.cs-wrap.open'), function (w) {
+    w.classList.remove('open');
   });
+}
+
+function refreshAllCustomSelects() {
+  Array.prototype.forEach.call(document.querySelectorAll('select'), function (s) {
+    if (s._csRefresh) s._csRefresh();
+  });
+}
+
+// Global listeners - run once
+if (!window._csGlobalBound) {
+  window._csGlobalBound = true;
+
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest || !e.target.closest('.cs-wrap')) {
+      closeAllCustomSelects();
+    }
+  });
+
+  document.addEventListener('reset', function (e) {
+    setTimeout(refreshAllCustomSelects, 0);
+  }, true);
 }
 
 /* ---------- Table renderer ---------- */
