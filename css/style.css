@@ -756,3 +756,166 @@ nav.bottom::-webkit-scrollbar { display: none; }
   .mini-box .k { font-size: 9.5px; }
   .mini-box .v { font-size: 13px; }
 }
+/* ============================================================
+   COMPACT MOBILE MODAL (phone-friendly)
+   ============================================================ */
+
+@media (max-width: 640px) {
+  .modal-backdrop {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .modal {
+    padding: 18px 16px;
+    border-radius: 20px 20px 16px 16px;
+    max-height: calc(100vh - 30px);
+    max-width: 100%;
+  }
+
+  .modal-head {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-head h3 {
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .close-x {
+    width: 28px;
+    height: 28px;
+  }
+
+  .close-x svg { width: 14px; height: 14px; }
+
+  /* Grid more compact */
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .field {
+    gap: 4px;
+  }
+
+  .field label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .field input,
+  .field textarea {
+    padding: 8px 11px;
+    font-size: 13px;
+    border-radius: 8px;
+    min-height: 38px;
+  }
+
+  .field textarea {
+    min-height: 50px;
+    padding: 8px 11px;
+  }
+
+  /* Custom select compact */
+  .cs-trigger {
+    min-height: 38px;
+    padding: 8px 34px 8px 11px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+
+  .cs-label {
+    font-size: 13px;
+  }
+
+  .cs-arrow {
+    width: 12px;
+    height: 12px;
+    right: 11px;
+  }
+
+  /* Mini boxes row */
+  .mini-grid-3 {
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  .mini-box {
+    padding: 7px 8px;
+    border-radius: 8px;
+  }
+
+  .mini-box .k {
+    font-size: 9px;
+    letter-spacing: 0.02em;
+  }
+
+  .mini-box .v {
+    font-size: 12.5px;
+    margin-top: 2px;
+  }
+
+  /* Actions row */
+  .modal-actions {
+    gap: 8px;
+    margin-top: 4px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .modal-actions .btn {
+    flex: 1;
+    justify-content: center;
+    padding: 10px 14px;
+    font-size: 13px;
+    min-height: 42px;
+  }
+
+  .modal-actions .btn-primary {
+    flex: 2;
+  }
+
+  /* Image upload area */
+  .img-upload-btns {
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .img-btn {
+    padding: 8px 12px;
+    font-size: 12.5px;
+  }
+
+  .img-thumb {
+    width: 66px;
+    height: 66px;
+    border-radius: 8px;
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 400px) {
+  .modal {
+    padding: 16px 14px;
+  }
+
+  .form-grid { gap: 8px; }
+
+  .field input,
+  .field textarea {
+    padding: 7px 10px;
+    font-size: 12.5px;
+  }
+
+  .cs-trigger {
+    min-height: 36px;
+    padding: 7px 32px 7px 10px;
+    font-size: 12.5px;
+  }
+
+  .modal-head h3 { font-size: 14px; }
+}
