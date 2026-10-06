@@ -125,13 +125,26 @@ function renderTrades() {
   } catch (err) { console.error('Trades render error:', err); }
 }
 
+/* Helper: walk up parents (works with SVG) */
+function findParentWithId(el, id) {
+  var cur = el;
+  var depth = 0;
+  while (cur && depth < 15) {
+    if (cur.id === id) return cur;
+    if (cur.classList && cur.classList.contains(id.replace('#',''))) return cur;
+    cur = cur.parentNode;
+    depth++;
+  }
+  return null;
+}
+
 /* ============================================================
    MASTER CLICK HANDLER
    ============================================================ */
 function masterClickHandler(e) {
   var target = e.target;
 
-  // 1. Bottom nav — open page
+  // 1. Bottom nav
   var navBtn = target.closest ? target.closest('.nav-item') : null;
   if (navBtn && navBtn.dataset.page) {
     e.preventDefault();
@@ -139,7 +152,7 @@ function masterClickHandler(e) {
     return;
   }
 
-  // 2. View/Edit/Delete
+  // 2. View/Edit/Delete actions
   var actionBtn = target.closest ? target.closest('[data-action]') : null;
   if (actionBtn) {
     var action = actionBtn.dataset.action;
@@ -176,14 +189,16 @@ function masterClickHandler(e) {
     return;
   }
 
-  // 5. Add Trade
-  if (target.closest && target.closest('#addTradeTop')) {
+  // 5. Add Trade (with SVG-safe parent walk)
+  if (findParentWithId(target, 'addTradeTop')) {
+    e.preventDefault();
     if (typeof openTradeModal === 'function') openTradeModal();
     return;
   }
 
   // 6. Theme toggle
-  if (target.closest && target.closest('#themeBtn')) {
+  if (findParentWithId(target, 'themeBtn')) {
+    e.preventDefault();
     toggleTheme();
     return;
   }
@@ -196,21 +211,21 @@ function masterClickHandler(e) {
   }
 
   // 8. Calendar prev/next
-  if (target.closest && target.closest('#calPrev')) {
+  if (findParentWithId(target, 'calPrev')) {
     calCurrent.setMonth(calCurrent.getMonth() - 1);
     renderCalendar();
     return;
   }
-  if (target.closest && target.closest('#calNext')) {
+  if (findParentWithId(target, 'calNext')) {
     calCurrent.setMonth(calCurrent.getMonth() + 1);
     renderCalendar();
     return;
   }
 
-  // 9. Add buttons
-  if (target.closest && target.closest('#addPlaybookBtn') && typeof openPlaybookModal === 'function') { openPlaybookModal(); return; }
-  if (target.closest && target.closest('#addReviewBtn') && typeof openReviewModal === 'function') { openReviewModal(); return; }
-  if (target.closest && target.closest('#addBacktestBtn') && typeof openBacktestModal === 'function') { openBacktestModal(); return; }
+  // 9. Add Playbook / Review / Backtest
+  if (findParentWithId(target, 'addPlaybookBtn') && typeof openPlaybookModal === 'function') { openPlaybookModal(); return; }
+  if (findParentWithId(target, 'addReviewBtn') && typeof openReviewModal === 'function') { openReviewModal(); return; }
+  if (findParentWithId(target, 'addBacktestBtn') && typeof openBacktestModal === 'function') { openBacktestModal(); return; }
 
   // 10. Modal backdrop
   if (target.classList && target.classList.contains('modal-backdrop') && target.classList.contains('show')) {
@@ -219,7 +234,7 @@ function masterClickHandler(e) {
   }
 
   // 11. Confirm OK
-  if (target.closest && target.closest('#confirmOk')) {
+  if (findParentWithId(target, 'confirmOk')) {
     closeModal('confirmModal');
     if (typeof _confirmCallback === 'function') {
       var cb = _confirmCallback;
@@ -278,6 +293,50 @@ function masterSubmitHandler(e) {
   if (f.id === 'backtestForm' && typeof submitBacktest === 'function') { submitBacktest(e); return; }
 }
 
+/* ============================================================
+   DIRECT BUTTON BINDINGS (fail-safe for SVG-inside-buttons)
+   ============================================================ */
+function bindDirectButtons() {
+  // Add Trade — top bar button
+  var addTop = document.getElementById('addTradeTop');
+  if (addTop) {
+    addTop.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof openTradeModal === 'function') openTradeModal();
+    }, true); // capture phase to run before bubbling
+  }
+
+  // Theme toggle
+  var themeBtn = document.getElementById('themeBtn');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleTheme();
+    }, true);
+  }
+
+  // Add Playbook / Review / Backtest — buttons without SVG but for safety
+  var ap = document.getElementById('addPlaybookBtn');
+  if (ap) ap.addEventListener('click', function (e) {
+    e.preventDefault();
+    if (typeof openPlaybookModal === 'function') openPlaybookModal();
+  }, true);
+
+  var ar = document.getElementById('addReviewBtn');
+  if (ar) ar.addEventListener('click', function (e) {
+    e.preventDefault();
+    if (typeof openReviewModal === 'function') openReviewModal();
+  }, true);
+
+  var ab = document.getElementById('addBacktestBtn');
+  if (ab) ab.addEventListener('click', function (e) {
+    e.preventDefault();
+    if (typeof openBacktestModal === 'function') openBacktestModal();
+  }, true);
+}
+
 function init() {
   try {
     var savedTheme = null;
@@ -289,11 +348,13 @@ function init() {
     if (typeof loadReviews === 'function') loadReviews();
     if (typeof loadBacktests === 'function') loadBacktests();
 
-    // Setup custom dropdowns — inside try/catch so it never breaks app
     try { if (typeof initCustomSelects === 'function') initCustomSelects(); }
     catch (e) { console.error('Custom selects failed:', e); }
 
-    // Global listeners
+    // Direct listeners FIRST (fail-safe)
+    bindDirectButtons();
+
+    // Master listeners (delegation for everything else)
     document.addEventListener('click', masterClickHandler, false);
     document.addEventListener('keydown', masterKeyHandler, false);
     document.addEventListener('change', masterChangeHandler, true);
