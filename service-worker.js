@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tradevault-v14';
+const CACHE_NAME = 'tradevault-v15';
 const ASSETS = [
   './', './index.html', './css/style.css',
   './js/ui.js', './js/storage.js', './js/trades.js', './js/analytics.js',
