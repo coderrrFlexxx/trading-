@@ -1621,3 +1621,222 @@ nav.bottom::-webkit-scrollbar { display: none; }
   .app { padding: 0; }
   .card { box-shadow: none; border: 1px solid #ddd; }
 }
+/* ============================================================
+   FINAL RESPONSIVE MODAL + APP-LIKE NAV OVERRIDES
+   ============================================================ */
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+/* All dialogs */
+.modal-backdrop {
+  padding: 16px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  overflow: hidden;
+}
+
+.modal {
+  width: min(100%, 540px);
+  max-height: min(82dvh, 760px);
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.modal-head {
+  position: sticky;
+  top: -20px;
+  z-index: 3;
+  background: var(--surface);
+  margin: -20px -20px 14px;
+  padding: 16px 20px 12px;
+}
+
+.modal-actions {
+  position: sticky;
+  bottom: -20px;
+  z-index: 3;
+  background: var(--surface);
+  margin-left: -20px;
+  margin-right: -20px;
+  margin-bottom: -20px;
+  padding: 10px 20px 14px;
+  border-top: 1px solid var(--border);
+}
+
+/* Compact forms */
+.form-grid {
+  gap: 12px;
+}
+
+.field {
+  gap: 5px;
+}
+
+.field input,
+.field select,
+.field textarea {
+  min-height: 42px;
+}
+
+.field textarea {
+  min-height: 64px;
+}
+
+/* Fixed bottom navigation */
+nav.bottom {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: max(8px, env(safe-area-inset-bottom)) !important;
+  transform: translate3d(-50%, 0, 0) !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  max-height: 72px;
+  touch-action: pan-x;
+}
+
+/* MOBILE */
+@media (max-width: 640px) {
+
+  .modal-backdrop {
+    padding: 8px;
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    align-items: center;
+  }
+
+  .modal {
+    width: min(94vw, 520px);
+    max-width: 94vw;
+    max-height: min(80dvh, 650px);
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .modal-head {
+    top: -16px;
+    margin: -16px -16px 12px;
+    padding: 13px 16px 10px;
+  }
+
+  .modal-head h3 {
+    font-size: 16px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .field input,
+  .field select,
+  .field textarea,
+  .cs-trigger {
+    min-height: 40px;
+    padding: 8px 11px;
+    font-size: 13px;
+    border-radius: 10px;
+  }
+
+  .field textarea {
+    min-height: 54px;
+  }
+
+  .mini-grid-3 {
+    gap: 5px;
+  }
+
+  .mini-box {
+    padding: 8px;
+  }
+
+  .modal-actions {
+    bottom: -16px;
+    margin-left: -16px;
+    margin-right: -16px;
+    margin-bottom: -16px;
+    padding: 9px 16px 12px;
+  }
+
+  .modal-actions .btn {
+    min-height: 42px;
+    padding: 9px 12px;
+  }
+
+  /* Bottom navigation stays fixed */
+  nav.bottom {
+    width: calc(100vw - 12px);
+    max-width: calc(100vw - 12px);
+    padding: 5px;
+    border-radius: 18px;
+    gap: 1px;
+  }
+
+  .nav-item {
+    padding: 7px 9px;
+    min-width: 54px;
+    gap: 3px;
+  }
+
+  .nav-item svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .nav-item span {
+    font-size: 9px;
+  }
+}
+
+/* SMALL PHONES */
+@media (max-width: 380px) {
+
+  .modal {
+    width: 95vw;
+    max-width: 95vw;
+    max-height: 78dvh;
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .modal-head {
+    top: -14px;
+    margin: -14px -14px 10px;
+    padding: 11px 14px 9px;
+  }
+
+  .modal-actions {
+    bottom: -14px;
+    margin-left: -14px;
+    margin-right: -14px;
+    margin-bottom: -14px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  nav.bottom {
+    width: calc(100vw - 8px);
+    max-width: calc(100vw - 8px);
+  }
+
+  .nav-item {
+    min-width: 49px;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+}
+
+/* DESKTOP */
+@media (min-width: 641px) {
+  .modal.modal-sm {
+    max-width: 420px;
+  }
+}
