@@ -2,13 +2,19 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-<meta name="theme-color" content="#faf8f0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0" />
+<meta name="theme-color" content="#faf8f0" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#12100b" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="TradeVault" />
+<meta name="mobile-web-app-capable" content="yes" />
 <title>TradeVault — Trading Journal</title>
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" type="image/svg+xml" href="icons/192.svg" />
+<link rel="apple-touch-icon" href="icons/192.svg" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/style.css?v=8" />
 </head>
 <body>
 
@@ -29,20 +35,14 @@
     </div>
   </header>
 
-  <!-- DASHBOARD -->
   <section id="page-dashboard">
-    <div class="page-head">
-      <h1>Dashboard</h1>
-      <p>Your trading process at a glance.</p>
-    </div>
-
+    <div class="page-head"><h1>Dashboard</h1><p>Your trading process at a glance.</p></div>
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-label">Net P&L</div><div class="stat-value" id="dashPnl">₹0.00</div><div class="stat-sub" id="dashPnlSub">0 trades</div></div>
-      <div class="stat-card"><div class="stat-label">Total R</div><div class="stat-value" id="dashTotalR">+0.00R</div><div class="stat-sub" id="dashTotalRSub">Sum of R-multiples</div></div>
+      <div class="stat-card"><div class="stat-label">Total R</div><div class="stat-value" id="dashTotalR">+0.00R</div><div class="stat-sub">Sum of R-multiples</div></div>
       <div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="dashWinRate">0.0%</div><div class="stat-sub" id="dashWinSub">0 wins / 0 total</div></div>
       <div class="stat-card"><div class="stat-label">Trades</div><div class="stat-value" id="dashTrades">0</div><div class="stat-sub">All time</div></div>
     </div>
-
     <div class="two-col">
       <div class="card">
         <div class="card-head"><h2>Equity Curve</h2><span class="card-sub" id="eqCurveSub">No trades</span></div>
@@ -60,7 +60,6 @@
         </div>
       </div>
     </div>
-
     <div class="two-col">
       <div class="card">
         <div class="card-head"><h2>Recent Trades</h2><button class="btn" data-goto="trades">View All</button></div>
@@ -73,26 +72,24 @@
     </div>
   </section>
 
-  <!-- TRADES -->
   <section id="page-trades" class="hidden">
     <div class="page-head"><h1>Trades</h1><p>Manage all your trades in one place</p></div>
     <div class="card">
       <div class="filters">
         <input type="text" id="filterSearch" placeholder="Search symbol..." />
-        <select id="filterSide"><option value="">All Sides</option><option value="BUY">Buy</option><option value="SELL">Sell</option></select>
+        <select id="filterSide"><option value="">All Sides</option><option value="BUY">Long</option><option value="SELL">Short</option></select>
         <select id="filterResult"><option value="">All Results</option><option value="win">Wins</option><option value="loss">Losses</option></select>
       </div>
       <div id="tradesList"></div>
     </div>
   </section>
 
-  <!-- CALENDAR -->
   <section id="page-calendar" class="hidden">
     <div class="page-head"><h1>Calendar</h1><p>Monthly performance view</p></div>
     <div class="card">
       <div class="cal-head">
         <button class="icon-btn" id="calPrev"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-        <h2 id="calMonth">Month</h2>
+        <h2 id="calMonth">—</h2>
         <button class="icon-btn" id="calNext"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
       <div class="cal-weekdays">
@@ -103,17 +100,14 @@
     </div>
   </section>
 
-  <!-- ANALYTICS -->
   <section id="page-analytics" class="hidden">
     <div class="page-head"><h1>Analytics</h1><p>See what your data is actually saying.</p></div>
-
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-label">Profit Factor</div><div class="stat-value" id="anPF">—</div></div>
       <div class="stat-card"><div class="stat-label">Expectancy / trade</div><div class="stat-value" id="anExp">—</div></div>
       <div class="stat-card"><div class="stat-label">Max Drawdown</div><div class="stat-value neg" id="anDD">0.00R</div></div>
       <div class="stat-card"><div class="stat-label">Rule Adherence</div><div class="stat-value" id="anAdherence">0%</div></div>
     </div>
-
     <div class="card">
       <div class="card-head"><h2>Performance Filters</h2></div>
       <div class="form-grid">
@@ -126,13 +120,9 @@
             <option value="365">Last 1 year</option>
           </select>
         </div>
-        <div class="field">
-          <label>Symbol filter</label>
-          <input type="text" id="anSymbol" placeholder="e.g. NIFTY" />
-        </div>
+        <div class="field"><label>Symbol filter</label><input type="text" id="anSymbol" placeholder="e.g. NIFTY" /></div>
       </div>
     </div>
-
     <div class="two-col">
       <div class="card">
         <div class="card-head"><h2>R-Multiple Curve</h2></div>
@@ -143,7 +133,6 @@
         <div id="anDirection"></div>
       </div>
     </div>
-
     <div class="two-col">
       <div class="card">
         <div class="card-head"><h2>Setup Performance</h2></div>
@@ -156,7 +145,6 @@
     </div>
   </section>
 
-  <!-- PLAYBOOK -->
   <section id="page-playbook" class="hidden">
     <div class="page-head"><h1>Playbook</h1><p>Your trading strategies and rules</p></div>
     <div class="card">
@@ -165,15 +153,11 @@
     </div>
   </section>
 
-  <!-- REVIEWS -->
   <section id="page-reviews" class="hidden">
     <div class="page-head"><h1>Reviews</h1><p>Daily, weekly and monthly process reviews.</p></div>
     <div class="card">
       <div class="card-head">
-        <div>
-          <h2>Reviews</h2>
-          <p class="card-sub">Review process, not just money.</p>
-        </div>
+        <div><h2>Reviews</h2><p class="card-sub">Review process, not just money.</p></div>
         <button class="btn btn-primary" id="addReviewBtn">Add Review</button>
       </div>
       <div class="tabs" id="reviewTabs">
@@ -186,15 +170,11 @@
     </div>
   </section>
 
-  <!-- RISK -->
   <section id="page-risk" class="hidden">
     <div class="page-head"><h1>Risk Calculator</h1><p>Size every trade before you enter.</p></div>
     <div class="card">
       <div class="card-head">
-        <div>
-          <h2>Risk Calculator</h2>
-          <p class="card-sub">Calculate position size before entering a trade.</p>
-        </div>
+        <div><h2>Risk Calculator</h2><p class="card-sub">Calculate position size before entering a trade.</p></div>
         <button class="btn" id="useInAddTrade">Use in Add Trade</button>
       </div>
       <div class="form-grid">
@@ -205,18 +185,10 @@
         <div class="field"><label>Target Price</label><input type="number" id="rTarget" step="any" placeholder="110" value="110" /></div>
         <div class="field"><label>Direction</label><select id="rSide"><option value="BUY">Long</option><option value="SELL">Short</option></select></div>
       </div>
-      <div class="risk-grid" id="riskResult">
-        <div class="risk-box"><div class="k">₹ Risk</div><div class="v neg">—</div></div>
-        <div class="risk-box"><div class="k">Risk / Unit</div><div class="v">—</div></div>
-        <div class="risk-box"><div class="k">Position Size</div><div class="v">—</div></div>
-        <div class="risk-box"><div class="k">R:R</div><div class="v">—</div></div>
-        <div class="risk-box"><div class="k">Target Profit ₹</div><div class="v pos">—</div></div>
-        <div class="risk-box"><div class="k">Capital Used ₹</div><div class="v">—</div></div>
-      </div>
+      <div class="risk-grid" id="riskResult"></div>
     </div>
   </section>
 
-  <!-- BACKTESTING -->
   <section id="page-backtesting" class="hidden">
     <div class="page-head"><h1>Backtesting</h1><p>Test your strategies historically</p></div>
     <div class="card">
@@ -225,7 +197,6 @@
     </div>
   </section>
 
-  <!-- SETTINGS -->
   <section id="page-settings" class="hidden">
     <div class="page-head"><h1>Settings</h1><p>App preferences and data management</p></div>
     <div class="card">
@@ -249,7 +220,7 @@
     </div>
     <div class="card">
       <div class="card-head"><h2>About</h2></div>
-      <p class="about-text">TradeVault — a simple offline trading journal. All data is stored locally in your browser (localStorage). No servers, no tracking.</p>
+      <p class="about-text">TradeVault — a simple offline trading journal. All data is stored locally in your browser (localStorage).</p>
     </div>
   </section>
 </div>
@@ -270,23 +241,70 @@
 <div class="modal-backdrop" id="tradeModal">
   <div class="modal">
     <div class="modal-head">
-      <h3 id="tradeModalTitle">Add Trade</h3>
+      <h3 id="tradeModalTitle">New Trade</h3>
       <button class="close-x" data-close="tradeModal" aria-label="Close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <form id="tradeForm" class="form-grid" autocomplete="off">
       <input type="hidden" id="tradeId" />
-      <div class="field"><label>Symbol *</label><input type="text" id="tSymbol" placeholder="NIFTY" required /></div>
-      <div class="field"><label>Side *</label><select id="tSide"><option value="BUY">BUY</option><option value="SELL">SELL</option></select></div>
-      <div class="field"><label>Entry Price *</label><input type="number" step="any" id="tEntry" required /></div>
-      <div class="field"><label>Exit Price *</label><input type="number" step="any" id="tExit" required /></div>
-      <div class="field"><label>Quantity *</label><input type="number" step="any" id="tQty" required /></div>
+
       <div class="field"><label>Date *</label><input type="date" id="tDate" required /></div>
+      <div class="field"><label>Symbol *</label><input type="text" id="tSymbol" placeholder="NIFTY / RELIANCE" required /></div>
+
+      <div class="field"><label>Direction *</label><select id="tSide"><option value="BUY">Long</option><option value="SELL">Short</option></select></div>
+      <div class="field"><label>Setup</label><input type="text" id="tSetup" placeholder="Your setup" /></div>
+
+      <div class="field"><label>Timeframe</label><input type="text" id="tTimeframe" placeholder="5m / 15m / 1H" /></div>
+      <div class="field"><label>Quantity *</label><input type="number" step="any" id="tQty" required /></div>
+
+      <div class="field"><label>Entry *</label><input type="number" step="any" id="tEntry" required /></div>
+      <div class="field"><label>Exit *</label><input type="number" step="any" id="tExit" required /></div>
+
       <div class="field"><label>Stop Loss</label><input type="number" step="any" id="tStop" /></div>
       <div class="field"><label>Target</label><input type="number" step="any" id="tTarget" /></div>
-      <div class="field"><label>Strategy</label><input type="text" id="tStrategy" placeholder="Breakout, Pullback, etc." /></div>
-      <div class="field"><label>Setup</label><input type="text" id="tSetup" placeholder="e.g. Breakout, Pullback" /></div>
-      <div class="field full"><label>Psychology / Rule Break</label><input type="text" id="tPsych" placeholder="e.g. FOMO, Revenge trade" /></div>
+
+      <div class="field"><label>Net P&L ₹</label><input type="number" step="any" id="tNetPnl" placeholder="After charges" /></div>
+      <div class="field"><label>Result R</label><input type="number" step="any" id="tResultR" placeholder="Auto-calculated" /></div>
+
+      <div class="full mini-grid-3">
+        <div class="mini-box"><div class="k">Risk ₹</div><div class="v" id="tRiskAmt">—</div></div>
+        <div class="mini-box"><div class="k">Risk %</div><div class="v" id="tRiskPct">—</div></div>
+        <div class="mini-box"><div class="k">Planned R:R</div><div class="v" id="tPlannedRR">—</div></div>
+      </div>
+
+      <div class="field full">
+        <label>Rule adherence</label>
+        <select id="tAdherence">
+          <option value="followed">Followed rules</option>
+          <option value="partial">Partially followed</option>
+          <option value="broke">Broke rules</option>
+        </select>
+      </div>
+
+      <div class="field"><label>Emotion before trade</label><input type="text" id="tEmotion" placeholder="Calm / FOMO / revenge" /></div>
+      <div class="field"><label>Mistake / violation</label><input type="text" id="tMistake" placeholder="e.g. Early exit, oversize" /></div>
+
+      <div class="field"><label>Entry reason</label><textarea id="tEntryReason" placeholder="Why did you enter?"></textarea></div>
+      <div class="field"><label>Exit reason</label><textarea id="tExitReason" placeholder="Why did you exit?"></textarea></div>
+
       <div class="field full"><label>Notes</label><textarea id="tNotes" placeholder="Add your notes..."></textarea></div>
+
+      <div class="field full">
+        <label>Chart Screenshots</label>
+        <div class="img-upload-btns">
+          <label class="btn img-btn" for="tCamera">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Camera
+          </label>
+          <label class="btn img-btn" for="tGallery">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Gallery
+          </label>
+        </div>
+        <input type="file" id="tCamera" accept="image/*" capture="environment" class="hidden" />
+        <input type="file" id="tGallery" accept="image/*" multiple class="hidden" />
+        <div class="img-preview" id="tPreview"></div>
+      </div>
+
       <div class="full modal-actions">
         <button type="button" class="btn" data-close="tradeModal">Cancel</button>
         <button type="submit" class="btn btn-primary" id="saveTradeBtn">Save Trade</button>
@@ -305,8 +323,8 @@
     <form id="playbookForm" class="form-grid" autocomplete="off">
       <input type="hidden" id="pbId" />
       <div class="field full"><label>Strategy Name *</label><input type="text" id="pbName" required /></div>
-      <div class="field full"><label>Description</label><textarea id="pbDesc" placeholder="What setup do you look for..."></textarea></div>
-      <div class="field full"><label>Rules (one per line)</label><textarea id="pbRules" placeholder="Rule 1&#10;Rule 2&#10;Rule 3"></textarea></div>
+      <div class="field full"><label>Description</label><textarea id="pbDesc"></textarea></div>
+      <div class="field full"><label>Rules (one per line)</label><textarea id="pbRules"></textarea></div>
       <div class="full modal-actions">
         <button type="button" class="btn" data-close="playbookModal">Cancel</button>
         <button type="submit" class="btn btn-primary">Save Strategy</button>
@@ -351,7 +369,7 @@
       <input type="hidden" id="btId" />
       <div class="field full"><label>Name *</label><input type="text" id="btName" required /></div>
       <div class="field"><label>Strategy</label><input type="text" id="btStrategy" /></div>
-      <div class="field"><label>Symbols</label><input type="text" id="btSymbols" placeholder="NIFTY, BANKNIFTY" /></div>
+      <div class="field"><label>Symbols</label><input type="text" id="btSymbols" /></div>
       <div class="field"><label>Start Date</label><input type="date" id="btStart" /></div>
       <div class="field"><label>End Date</label><input type="date" id="btEnd" /></div>
       <div class="field"><label>Total Trades</label><input type="number" id="btTrades" /></div>
@@ -367,7 +385,20 @@
   </div>
 </div>
 
-<!-- CONFIRM MODAL -->
+<!-- TRADE DETAIL MODAL -->
+<div class="modal-backdrop" id="detailModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Trade Details</h3>
+      <button class="close-x" data-close="detailModal" aria-label="Close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="detailBody"></div>
+    <div class="modal-actions" style="margin-top:20px">
+      <button type="button" class="btn" data-close="detailModal">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="confirmModal">
   <div class="modal modal-sm">
     <div class="modal-head">
@@ -384,16 +415,15 @@
 
 <div id="toast"></div>
 
-<script src="js/ui.js"></script>
-<script src="js/storage.js"></script>
-<script src="js/trades.js"></script>
-<script src="js/analytics.js"></script>
-<script src="js/calendar.js"></script>
-<script src="js/playbook.js"></script>
-<script src="js/reviews.js"></script>
-<script src="js/risk.js"></script>
-<script src="js/backtesting.js"></script>
-<script src="js/settings.js"></script>
-<script src="js/app.js"></script>
+<script src="js/ui.js?v=8"></script>
+<script src="js/storage.js?v=8"></script>
+<script src="js/trades.js?v=8"></script>
+<script src="js/analytics.js?v=8"></script>
+<script src="js/playbook.js?v=8"></script>
+<script src="js/reviews.js?v=8"></script>
+<script src="js/risk.js?v=8"></script>
+<script src="js/backtesting.js?v=8"></script>
+<script src="js/settings.js?v=8"></script>
+<script src="js/app.js?v=8"></script>
 </body>
 </html>
