@@ -23,13 +23,15 @@ function go(page) {
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  if (page === 'dashboard') renderDashboard();
-  if (page === 'trades') renderTrades();
-  if (page === 'calendar') renderCalendar();
-  if (page === 'analytics') renderAnalytics();
-  if (page === 'playbook') renderPlaybook();
-  if (page === 'reviews') renderReviews();
-  if (page === 'backtesting') renderBacktests();
+  try {
+    if (page === 'dashboard' && typeof renderDashboard === 'function') renderDashboard();
+    if (page === 'trades' && typeof renderTrades === 'function') renderTrades();
+    if (page === 'calendar' && typeof renderCalendar === 'function') renderCalendar();
+    if (page === 'analytics' && typeof renderAnalytics === 'function') renderAnalytics();
+    if (page === 'playbook' && typeof renderPlaybook === 'function') renderPlaybook();
+    if (page === 'reviews' && typeof renderReviews === 'function') renderReviews();
+    if (page === 'backtesting' && typeof renderBacktests === 'function') renderBacktests();
+  } catch (err) { console.error('Render error:', err); }
 }
 
 function renderCalendar() {
@@ -51,7 +53,7 @@ function renderCalendar() {
     var isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
 
     var byDate = {};
-    (trades || []).forEach(function (t) {
+    (typeof trades !== 'undefined' && trades ? trades : []).forEach(function (t) {
       if (!t.date) return;
       var d = String(t.date).slice(0, 10);
       if (!byDate[d]) byDate[d] = { pnl: 0, count: 0 };
@@ -103,32 +105,46 @@ function renderCalendar() {
 }
 
 function renderTrades() {
-  var q = ($('filterSearch').value || '').toLowerCase();
-  var side = $('filterSide').value;
-  var res = $('filterResult').value;
+  try {
+    var q = ($('filterSearch').value || '').toLowerCase();
+    var side = $('filterSide').value;
+    var res = $('filterResult').value;
 
-  var list = tradesSorted();
-  if (q) list = list.filter(function (t) { return (t.symbol || '').toLowerCase().indexOf(q) > -1; });
-  if (side) list = list.filter(function (t) { return t.side === side; });
-  if (res === 'win') list = list.filter(function (t) { return calcPnl(t) > 0; });
-  if (res === 'loss') list = list.filter(function (t) { return calcPnl(t) < 0; });
+    var list = tradesSorted();
+    if (q) list = list.filter(function (t) { return (t.symbol || '').toLowerCase().indexOf(q) > -1; });
+    if (side) list = list.filter(function (t) { return t.side === side; });
+    if (res === 'win') list = list.filter(function (t) { return calcPnl(t) > 0; });
+    if (res === 'loss') list = list.filter(function (t) { return calcPnl(t) < 0; });
 
-  var cont = $('tradesList');
-  if (!list.length) {
-    cont.innerHTML = '<div class="empty">No trades match your filters.</div>';
-    return;
-  }
-  cont.innerHTML = renderTable(list, false);
+    var cont = $('tradesList');
+    if (!list.length) {
+      cont.innerHTML = '<div class="empty">No trades match your filters.</div>';
+      return;
+    }
+    cont.innerHTML = renderTable(list, false);
+  } catch (err) { console.error('Trades render error:', err); }
 }
 
-function bindGlobalActions() {
-  document.addEventListener('click', function (e) {
-    var target = e.target;
+/* ============================================================
+   MASTER CLICK HANDLER
+   ============================================================ */
+function masterClickHandler(e) {
+  var target = e.target;
 
-    var btn = target.closest ? target.closest('[data-action]') : null;
-    if (btn) {
-      var action = btn.dataset.action;
-      var id = btn.dataset.id;
+  // 1. Bottom nav — open page
+  var navBtn = target.closest ? target.closest('.nav-item') : null;
+  if (navBtn && navBtn.dataset.page) {
+    e.preventDefault();
+    go(navBtn.dataset.page);
+    return;
+  }
+
+  // 2. View/Edit/Delete
+  var actionBtn = target.closest ? target.closest('[data-action]') : null;
+  if (actionBtn) {
+    var action = actionBtn.dataset.action;
+    var id = actionBtn.dataset.id;
+    try {
       if (action === 'edit-trade') editTrade(id);
       else if (action === 'delete-trade') deleteTrade(id);
       else if (action === 'view-trade') viewTradeDetail(id);
@@ -138,130 +154,167 @@ function bindGlobalActions() {
       else if (action === 'delete-review') deleteReview(id);
       else if (action === 'edit-backtest') editBacktest(id);
       else if (action === 'delete-backtest') deleteBacktest(id);
-      return;
-    }
+    } catch (err) { console.error('Action error:', err); }
+    return;
+  }
 
-    var closeBtn = target.closest ? target.closest('[data-close]') : null;
-    if (closeBtn) {
-      closeModal(closeBtn.dataset.close);
-      if (closeBtn.dataset.close === 'tradeModal') editingTradeId = null;
-      if (closeBtn.dataset.close === 'playbookModal') editingPlaybookId = null;
-      if (closeBtn.dataset.close === 'reviewModal') editingReviewId = null;
-      if (closeBtn.dataset.close === 'backtestModal') editingBacktestId = null;
-      return;
-    }
+  // 3. Close modal
+  var closeBtn = target.closest ? target.closest('[data-close]') : null;
+  if (closeBtn) {
+    closeModal(closeBtn.dataset.close);
+    if (closeBtn.dataset.close === 'tradeModal' && typeof editingTradeId !== 'undefined') editingTradeId = null;
+    if (closeBtn.dataset.close === 'playbookModal' && typeof editingPlaybookId !== 'undefined') editingPlaybookId = null;
+    if (closeBtn.dataset.close === 'reviewModal' && typeof editingReviewId !== 'undefined') editingReviewId = null;
+    if (closeBtn.dataset.close === 'backtestModal' && typeof editingBacktestId !== 'undefined') editingBacktestId = null;
+    return;
+  }
 
-    var gotoBtn = target.closest ? target.closest('[data-goto]') : null;
-    if (gotoBtn) { go(gotoBtn.dataset.goto); return; }
-  });
+  // 4. Goto buttons
+  var gotoBtn = target.closest ? target.closest('[data-goto]') : null;
+  if (gotoBtn && gotoBtn.dataset.goto) {
+    go(gotoBtn.dataset.goto);
+    return;
+  }
+
+  // 5. Add Trade
+  if (target.closest && target.closest('#addTradeTop')) {
+    if (typeof openTradeModal === 'function') openTradeModal();
+    return;
+  }
+
+  // 6. Theme toggle
+  if (target.closest && target.closest('#themeBtn')) {
+    toggleTheme();
+    return;
+  }
+
+  // 7. Remove screenshot
+  var rem = target.closest ? target.closest('[data-remove-img]') : null;
+  if (rem && typeof removeScreenshot === 'function') {
+    removeScreenshot(parseInt(rem.dataset.removeImg, 10));
+    return;
+  }
+
+  // 8. Calendar prev/next
+  if (target.closest && target.closest('#calPrev')) {
+    calCurrent.setMonth(calCurrent.getMonth() - 1);
+    renderCalendar();
+    return;
+  }
+  if (target.closest && target.closest('#calNext')) {
+    calCurrent.setMonth(calCurrent.getMonth() + 1);
+    renderCalendar();
+    return;
+  }
+
+  // 9. Add buttons
+  if (target.closest && target.closest('#addPlaybookBtn') && typeof openPlaybookModal === 'function') { openPlaybookModal(); return; }
+  if (target.closest && target.closest('#addReviewBtn') && typeof openReviewModal === 'function') { openReviewModal(); return; }
+  if (target.closest && target.closest('#addBacktestBtn') && typeof openBacktestModal === 'function') { openBacktestModal(); return; }
+
+  // 10. Modal backdrop
+  if (target.classList && target.classList.contains('modal-backdrop') && target.classList.contains('show')) {
+    closeModal(target.id);
+    return;
+  }
+
+  // 11. Confirm OK
+  if (target.closest && target.closest('#confirmOk')) {
+    closeModal('confirmModal');
+    if (typeof _confirmCallback === 'function') {
+      var cb = _confirmCallback;
+      _confirmCallback = null;
+      cb();
+    }
+    return;
+  }
 }
 
-function bindModalDismiss() {
-  $$('.modal-backdrop').forEach(function (backdrop) {
-    backdrop.addEventListener('click', function (e) {
-      if (e.target === backdrop) closeModal(backdrop.id);
-    });
-  });
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') {
-      var open = document.querySelector('.modal-backdrop.show');
-      if (open) closeModal(open.id);
-    }
-  });
-
-  var okBtn = $('confirmOk');
-  if (okBtn) {
-    okBtn.addEventListener('click', function () {
-      closeModal('confirmModal');
-      if (typeof _confirmCallback === 'function') {
-        var cb = _confirmCallback;
-        _confirmCallback = null;
-        cb();
-      }
-    });
+function masterKeyHandler(e) {
+  if (e.key === 'Escape') {
+    var open = document.querySelector('.modal-backdrop.show');
+    if (open) closeModal(open.id);
   }
+}
+
+function masterChangeHandler(e) {
+  var t = e.target;
+  if (!t || !t.id) return;
+
+  if (t.id === 'filterSide' || t.id === 'filterResult') { renderTrades(); return; }
+  if (t.id === 'anPeriod') { if (typeof renderAnalytics === 'function') renderAnalytics(); return; }
+  if (t.id === 'themeSelect') { applyTheme(t.value); return; }
+  if (t.id === 'tCamera' && typeof handleImageFiles === 'function') { handleImageFiles(t.files); t.value = ''; return; }
+  if (t.id === 'tGallery' && typeof handleImageFiles === 'function') { handleImageFiles(t.files); t.value = ''; return; }
+  if (t.id === 'importFile' && typeof importData === 'function' && t.files[0]) { importData(t.files[0]); t.value = ''; return; }
+  if (t.id === 'rSide' || t.id === 'rBalance' || t.id === 'rRiskPct' || t.id === 'rEntry' || t.id === 'rStop' || t.id === 'rTarget') {
+    if (typeof calcRisk === 'function') calcRisk();
+    return;
+  }
+}
+
+function masterInputHandler(e) {
+  var t = e.target;
+  if (!t || !t.id) return;
+
+  if (t.id === 'filterSearch') { renderTrades(); return; }
+  if (t.id === 'anSymbol') { if (typeof renderAnalytics === 'function') renderAnalytics(); return; }
+  if (t.id === 'tEntry' || t.id === 'tStop' || t.id === 'tTarget' || t.id === 'tQty') {
+    if (typeof updateTradeMiniBoxes === 'function') updateTradeMiniBoxes();
+    return;
+  }
+  if (t.id === 'rBalance' || t.id === 'rRiskPct' || t.id === 'rEntry' || t.id === 'rStop' || t.id === 'rTarget') {
+    if (typeof calcRisk === 'function') calcRisk();
+    return;
+  }
+}
+
+function masterSubmitHandler(e) {
+  var f = e.target;
+  if (!f || !f.id) return;
+  if (f.id === 'tradeForm' && typeof submitTrade === 'function') { submitTrade(e); return; }
+  if (f.id === 'playbookForm' && typeof submitPlaybook === 'function') { submitPlaybook(e); return; }
+  if (f.id === 'reviewForm' && typeof submitReview === 'function') { submitReview(e); return; }
+  if (f.id === 'backtestForm' && typeof submitBacktest === 'function') { submitBacktest(e); return; }
 }
 
 function init() {
-  var savedTheme = null;
-  try { savedTheme = localStorage.getItem(KEYS.theme); } catch (e) {}
-  applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
+  try {
+    var savedTheme = null;
+    try { savedTheme = localStorage.getItem(KEYS.theme); } catch (e) {}
+    applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
 
-  loadTrades();
-  loadPlaybook();
-  loadReviews();
-  loadBacktests();
+    if (typeof loadTrades === 'function') loadTrades();
+    if (typeof loadPlaybook === 'function') loadPlaybook();
+    if (typeof loadReviews === 'function') loadReviews();
+    if (typeof loadBacktests === 'function') loadBacktests();
 
-  // Init custom dropdowns FIRST (before wiring listeners)
-  initCustomSelects();
+    // Setup custom dropdowns — inside try/catch so it never breaks app
+    try { if (typeof initCustomSelects === 'function') initCustomSelects(); }
+    catch (e) { console.error('Custom selects failed:', e); }
 
-  $('themeBtn').addEventListener('click', toggleTheme);
-  $('addTradeTop').addEventListener('click', function () { openTradeModal(); });
+    // Global listeners
+    document.addEventListener('click', masterClickHandler, false);
+    document.addEventListener('keydown', masterKeyHandler, false);
+    document.addEventListener('change', masterChangeHandler, true);
+    document.addEventListener('input', masterInputHandler, true);
+    document.addEventListener('submit', masterSubmitHandler, false);
 
-  $('tradeForm').addEventListener('submit', submitTrade);
-  $('playbookForm').addEventListener('submit', submitPlaybook);
-  $('reviewForm').addEventListener('submit', submitReview);
-  $('backtestForm').addEventListener('submit', submitBacktest);
+    if (typeof initReviewTabs === 'function') initReviewTabs();
+    if (typeof initRisk === 'function') initRisk();
+    if (typeof initSettings === 'function') initSettings();
 
-  ['tEntry', 'tStop', 'tTarget', 'tQty'].forEach(function (id) {
-    var el = $(id);
-    if (el) el.addEventListener('input', updateTradeMiniBoxes);
-  });
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        regs.forEach(function (r) { r.update(); });
+      }).catch(function () {});
+      navigator.serviceWorker.register('service-worker.js').catch(function () {});
+    }
 
-  // Screenshots
-  var cam = $('tCamera');
-  if (cam) cam.addEventListener('change', function (e) {
-    handleImageFiles(e.target.files); e.target.value = '';
-  });
-  var gal = $('tGallery');
-  if (gal) gal.addEventListener('change', function (e) {
-    handleImageFiles(e.target.files); e.target.value = '';
-  });
-  document.addEventListener('click', function (e) {
-    var rem = e.target.closest ? e.target.closest('[data-remove-img]') : null;
-    if (rem) removeScreenshot(parseInt(rem.dataset.removeImg, 10));
-  });
-
-  $$('.nav-item').forEach(function (btn) {
-    btn.addEventListener('click', function () { go(btn.dataset.page); });
-  });
-
-  $('filterSearch').addEventListener('input', renderTrades);
-  $('filterSide').addEventListener('change', renderTrades);
-  $('filterResult').addEventListener('change', renderTrades);
-
-  $('calPrev').addEventListener('click', function () {
-    calCurrent.setMonth(calCurrent.getMonth() - 1);
-    renderCalendar();
-  });
-  $('calNext').addEventListener('click', function () {
-    calCurrent.setMonth(calCurrent.getMonth() + 1);
-    renderCalendar();
-  });
-
-  $('addPlaybookBtn').addEventListener('click', function () { openPlaybookModal(); });
-  $('addReviewBtn').addEventListener('click', function () { openReviewModal(); });
-  $('addBacktestBtn').addEventListener('click', function () { openBacktestModal(); });
-
-  if ($('anPeriod')) $('anPeriod').addEventListener('change', renderAnalytics);
-  if ($('anSymbol')) $('anSymbol').addEventListener('input', renderAnalytics);
-
-  initReviewTabs();
-  initRisk();
-  initSettings();
-
-  bindGlobalActions();
-  bindModalDismiss();
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function (regs) {
-      regs.forEach(function (r) { r.update(); });
-    }).catch(function () {});
-    navigator.serviceWorker.register('service-worker.js').catch(function () {});
+    go('dashboard');
+  } catch (err) {
+    console.error('Init error:', err);
   }
-
-  go('dashboard');
 }
 
 if (document.readyState === 'loading') {
